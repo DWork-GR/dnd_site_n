@@ -2,7 +2,7 @@ Object.assign(DndApp, {
   navigate(id) {
     this.$$(".page").forEach(page => page.classList.toggle("active", page.id === id));
     this.$$(".nav-link").forEach(link => link.classList.toggle("active", link.dataset.page === id));
-    const titles = { overview: "Добрый вечер, Хранитель", heroes: "Герои вашей истории", world: "Мир и его тайны", calendar: "Календарь кампании", media: "Медиатека кампании", bestiary: "Бестиарий кампании", shops: "Магазины и торговцы", tools: "Инструменты мастера", workshop: "Личная мастерская" };
+    const titles = { overview: `${this.data.campaignSettings?.greeting || "Добрый вечер"}, ${this.data.campaignSettings?.masterName || "Хранитель"}`, heroes: "Герои вашей истории", world: "Мир и его тайны", calendar: "Календарь кампании", media: "Медиатека кампании", bestiary: "Бестиарий кампании", shops: "Магазины и торговцы", tools: "Инструменты мастера", workshop: "Личная мастерская" };
     this.$("#page-title").textContent = titles[id];
     this.$(".sidebar").classList.remove("open");
   },
@@ -38,6 +38,33 @@ Object.assign(DndApp, {
     const list = this.data.characters.filter(c => c.kind === "player" && (group === "all" || this.data.packs.find(p => p.id === c.packId)?.name === group));
     this.$("#character-grid").innerHTML = list.map(c => this.characterCard(c)).join("") || "<p>В этой группе пока нет героев.</p>";
     this.renderPlayerRoster();
+  },
+
+  renderCampaignChrome() {
+    const settings = this.data.campaignSettings || {};
+    const campaignName = settings.campaignName || "Моя кампания";
+    const now = new Date();
+    const upcoming = [...this.data.sessions].filter(session => session.status === "planned" && session.date && new Date(`${session.date}T23:59:59`) >= now).sort((a, b) => String(a.date).localeCompare(String(b.date)))[0];
+    const completed = this.data.sessions.filter(session => session.status === "completed").length;
+    const days = upcoming ? Math.ceil((new Date(`${upcoming.date}T12:00:00`) - now) / 86400000) : null;
+    document.title = `${settings.brandTitle || "Архив мастера"} · ${campaignName}`;
+    document.documentElement.style.setProperty("--gold", /^#[0-9a-f]{6}$/i.test(settings.accentColor || "") ? settings.accentColor : "#d7aa5e");
+    const banner = this.$(".hero-banner");
+    banner.style.backgroundImage = settings.heroImageUrl ? `linear-gradient(100deg, #201a15ee 20%, #1c1713aa 57%, #141311dd), url("${String(settings.heroImageUrl).replaceAll('"', "%22")}")` : "";
+    banner.style.backgroundSize = settings.heroImageUrl ? "cover" : "";
+    banner.style.backgroundPosition = settings.heroImageUrl ? "center" : "";
+    this.$("#brand-title").textContent = settings.brandTitle || "Архив мастера";
+    this.$("#brand-eyebrow").textContent = settings.brandEyebrow || "Личная летопись";
+    this.$("#sidebar-campaign-name").textContent = campaignName;
+    this.$("#sidebar-campaign-meta").textContent = `${completed} сыграно${settings.campaignChapter ? ` · ${settings.campaignChapter}` : ""}`;
+    this.$("#topbar-caption").textContent = settings.campaignChapter || campaignName;
+    this.$("#world-heading").textContent = settings.worldTitle || `Атлас · ${campaignName}`;
+    if (this.$("#overview").classList.contains("active")) this.$("#page-title").textContent = `${settings.greeting || "Добрый вечер"}, ${settings.masterName || "Хранитель"}`;
+    this.$("#hero-kicker").textContent = settings.heroKicker || (upcoming ? `Следующая игра${days === 0 ? " · сегодня" : days === 1 ? " · завтра" : ` · через ${days} дн.`}` : "Следующая игра ещё не назначена");
+    this.$("#hero-title").textContent = settings.heroTitle || upcoming?.title || campaignName;
+    this.$("#hero-description").textContent = settings.heroDescription || upcoming?.plan || settings.campaignDescription || "Здесь появится описание кампании или план ближайшей сессии.";
+    this.$("#hero-session-number").textContent = completed + 1;
+    this.$("#hero-session-name").textContent = upcoming?.title ? `«${upcoming.title}»` : "Не назначена";
   },
 
   async renderPlayerRoster() {
@@ -147,6 +174,6 @@ Object.assign(DndApp, {
   },
 
   renderAll() {
-    this.renderOverview(); this.renderCharacters(); this.renderLore(); this.renderCalendar(); this.renderMedia(); this.renderBestiary(); this.renderShops(); this.renderInitiative(); this.renderWorkshop();
+    this.renderCampaignChrome(); this.renderOverview(); this.renderCharacters(); this.renderLore(); this.renderCalendar(); this.renderMedia(); this.renderBestiary(); this.renderShops(); this.renderInitiative(); this.renderWorkshop();
   }
 });

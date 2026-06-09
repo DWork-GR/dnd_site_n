@@ -13,6 +13,7 @@ let traitCards = {};
 let dirty = false;
 let combatState = { active: false };
 let playerEvents = null;
+let knownLore = [];
 
 const escapeHtml = value => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 const setStatus = text => $("#sync-status").textContent = text;
@@ -159,6 +160,7 @@ function renderCombat(combat) {
     character.maxHp = self.maxHp;
     $("#sheet-page").elements.hp.value = self.hp;
     $("#sheet-page").elements.maxHp.value = self.maxHp;
+    $("#quick-hp").textContent = `${Number(self.hp || 0)} / ${Number(self.maxHp || 0)}`;
     $("#sheet-page").elements.deathSuccesses.value = self.deathSuccesses || 0;
     $("#sheet-page").elements.deathFailures.value = self.deathFailures || 0;
     const available = Math.max(0, Number(character.hitDiceTotal ?? character.level ?? 1) - Number(character.usedHitDice || 0));
@@ -199,6 +201,11 @@ function render(data) {
   attackCards=structuredClone(character.attackCards||(character.attacks?[{name:"Общие атаки",damageDie:"",proficient:false,description:character.attacks}]:[])).map(item=>({...item,_editing:false}));
   traitCards=Object.fromEntries(["personality","ideals","bonds","flaws"].map(key=>[key,structuredClone(character.traitCards?.[key]||(character[key]?[{name:"Общее",description:character[key]}]:[])).map(item=>({...item,_editing:false}))]));
   $("#character-title").textContent = character.name || "Персонаж";
+  $("#character-subtitle").textContent = [character.race, character.className, character.background].filter(Boolean).join(" · ") || "История героя продолжается";
+  $("#quick-level").textContent = Number(character.level || 1);
+  $("#quick-class").textContent = character.className || "Без класса";
+  $("#quick-hp").textContent = `${Number(character.hp || 0)} / ${Number(character.maxHp || 0)}`;
+  $("#quick-gold").textContent = Number(character.gold || 0).toLocaleString("ru");
   $("#player-portrait").src = character.portraitUrl || "";
   $("#player-portrait").classList.toggle("visible", Boolean(character.portraitUrl));
   const form = $("#sheet-page");
@@ -229,7 +236,8 @@ function render(data) {
   $("#journal-memories").value = journal.memories;
   $("#journal-goals").value = journal.goals;
   $("#personal-notes").value = journal.notes;
-  $("#public-lore").innerHTML = data.lore.length ? data.lore.map(item => `<article class="lore-card">${item.images?.length ? `<div class="player-lore-images">${item.images.map(image => `<a href="${escapeHtml(image.url)}" target="_blank" rel="noopener"><img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.title || item.title)}"></a>`).join("")}</div>` : ""}<span>${escapeHtml(item.type)}</span><h3>${escapeHtml(item.title)}</h3>${item.ideology ? `<strong>${window.RichText.render(item.ideology, escapeHtml)}</strong>` : ""}<p>${window.RichText.render(item.text, escapeHtml)}</p></article>`).join("") : "<p class='empty'>Мастер пока ничего не опубликовал.</p>";
+  knownLore = structuredClone(data.lore || []);
+  $("#public-lore").innerHTML = knownLore.length ? knownLore.map((item, index) => `<article class="lore-card openable" data-open-player-lore="${index}" tabindex="0" role="button">${item.images?.length ? `<div class="player-lore-images"><img src="${escapeHtml(item.images[0].url)}" alt="${escapeHtml(item.images[0].title || item.title)}">${item.images.length > 1 ? `<b>+${item.images.length - 1}</b>` : ""}</div>` : ""}<span>${escapeHtml(item.type)}</span><h3>${escapeHtml(item.title)}</h3>${item.ideology ? `<strong>${window.RichText.render(item.ideology, escapeHtml)}</strong>` : ""}<p>${window.RichText.render(item.text, escapeHtml)}</p><button type="button" class="lore-read-more" data-open-player-lore="${index}">Открыть досье</button></article>`).join("") : "<p class='empty'>Мастер пока ничего не опубликовал.</p>";
   renderSpells();
   renderInventory();
   renderFeatures();
@@ -310,6 +318,28 @@ $("#register-form").onsubmit = async event => {
   } catch (error) { $("#login-error").textContent = error.message; }
 };
 $("#logout").onclick = async () => { await api("/api/player/logout", { method: "POST" }); location.reload(); };
+function openPlayerLore(index) {
+  const item = knownLore[index];
+  if (!item) return;
+  $("#player-lore-detail").innerHTML = `
+    <header><span>${escapeHtml(item.type || "Запись мира")}</span><h2>${escapeHtml(item.title || "Без названия")}</h2></header>
+    ${item.images?.length ? `<div class="player-lore-detail-images">${item.images.map(image => `<a href="${escapeHtml(image.url)}" target="_blank" rel="noopener"><img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.title || item.title)}"><small>${escapeHtml(image.title || "")}</small></a>`).join("")}</div>` : ""}
+    ${item.ideology ? `<blockquote>${window.RichText.render(item.ideology, escapeHtml)}</blockquote>` : ""}
+    <div class="player-lore-detail-text">${window.RichText.render(item.text || "", escapeHtml) || "<p>Описание пока не добавлено.</p>"}</div>`;
+  window.RichText.enhance($("#player-lore-detail"));
+  $("#player-lore-dialog").showModal();
+}
+$("#public-lore").addEventListener("click", event => {
+  const target = event.target.closest("[data-open-player-lore]");
+  if (target) openPlayerLore(Number(target.dataset.openPlayerLore));
+});
+$("#public-lore").addEventListener("keydown", event => {
+  if (!["Enter", " "].includes(event.key)) return;
+  const target = event.target.closest("[data-open-player-lore]");
+  if (target) { event.preventDefault(); openPlayerLore(Number(target.dataset.openPlayerLore)); }
+});
+$("#close-player-lore").onclick = () => $("#player-lore-dialog").close();
+$("#player-lore-dialog").onclick = event => { if (event.target === $("#player-lore-dialog")) $("#player-lore-dialog").close(); };
 $("#save-character").onclick = saveCharacter;
 $("#save-notes").onclick = async () => {
   const body = JSON.stringify({ version: 2, knowledge: $("#journal-knowledge").value, memories: $("#journal-memories").value, goals: $("#journal-goals").value, notes: $("#personal-notes").value });
@@ -402,6 +432,11 @@ $("#sheet-page").addEventListener("input", event => {
     if (form.elements[`skill-${skill}`]) form.elements[`skill-${skill}`].checked = true;
   }
   renderDerivedStats();
+  const form = $("#sheet-page");
+  $("#quick-level").textContent = Number(form.elements.level?.value || 1);
+  $("#quick-class").textContent = form.elements.className?.value || "Без класса";
+  $("#quick-gold").textContent = Number(form.elements.gold?.value || 0).toLocaleString("ru");
+  $("#character-subtitle").textContent = [form.elements.race?.value, form.elements.className?.value, form.elements.background?.value].filter(Boolean).join(" · ") || "История героя продолжается";
   markDirty();
 });
 $("#spells-page").addEventListener("input", markDirty);
@@ -415,6 +450,7 @@ $("#heal-with-hit-die").onclick = async () => {
     const result = await api("/api/player/heal", { method: "POST", body: "{}" });
     character = result.character;
     $("#sheet-page").elements.hp.value = character.hp;
+    $("#quick-hp").textContent = `${Number(character.hp || 0)} / ${Number(character.maxHp || 0)}`;
     $("#sheet-page").elements.deathSuccesses.value = character.deathSuccesses || 0;
     $("#sheet-page").elements.deathFailures.value = character.deathFailures || 0;
     const total = Number(character.hitDiceTotal ?? character.level ?? 1);

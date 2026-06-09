@@ -16,8 +16,8 @@
     <div class="brand">
       <div class="brand-mark">D20</div>
       <div>
-        <span class="eyebrow">Личная летопись</span>
-        <strong>Архив мастера</strong>
+      <span class="eyebrow" id="brand-eyebrow">Личная летопись</span>
+      <strong id="brand-title">Архив мастера</strong>
       </div>
     </div>
 
@@ -35,12 +35,12 @@
 
     <div class="campaign-card">
       <span class="eyebrow">Текущая кампания</span>
-      <strong>Пепельный Трон</strong>
+      <strong id="sidebar-campaign-name">Пепельный Трон</strong>
       <div class="progress"><i></i></div>
-      <small>12 сессий · Глава III</small>
+      <small id="sidebar-campaign-meta">12 сессий · Глава III</small>
     </div>
 
-    <button class="profile" data-message="Профиль мастера пока использует настройки из .env">
+    <button class="profile" id="master-profile">
       <span class="avatar">DM</span>
       <span><strong>Хранитель мира</strong><small>Dungeon Master</small></span>
       <b>•••</b>
@@ -51,7 +51,7 @@
     <header class="topbar">
       <button class="mobile-menu" id="mobile-menu">☰</button>
       <div>
-        <span class="eyebrow">Пятница · 5 июня</span>
+        <span class="eyebrow" id="topbar-caption">Кампания</span>
         <h1 id="page-title">Добрый вечер, Хранитель</h1>
       </div>
       <div class="top-actions">
@@ -65,9 +65,9 @@
     <section class="page active" id="overview">
       <div class="hero-banner">
         <div class="hero-copy">
-          <span class="eyebrow">Следующая игра · через 3 дня</span>
-          <h2>Тени над<br><em>Элдервейлом</em></h2>
-          <p>Герои добрались до ворот забытого города. За каменной аркой их уже ждёт то, чему не следовало просыпаться.</p>
+          <span class="eyebrow" id="hero-kicker">Следующая игра · через 3 дня</span>
+          <h2 id="hero-title">Тени над Элдервейлом</h2>
+          <p id="hero-description">Герои добрались до ворот забытого города. За каменной аркой их уже ждёт то, чему не следовало просыпаться.</p>
           <div class="hero-actions">
             <button class="primary-button" data-goto="world">Открыть заметки</button>
             <button class="ghost-button" id="session-button">Начать сессию</button>
@@ -75,7 +75,7 @@
         </div>
         <div class="moon"><span></span></div>
         <div class="session-info">
-          <span>СЕССИЯ</span><strong>13</strong><small>«За вратами»</small>
+          <span>СЕССИЯ</span><strong id="hero-session-number">13</strong><small id="hero-session-name">«За вратами»</small>
         </div>
       </div>
 
@@ -127,7 +127,7 @@
 
     <section class="page" id="world">
       <div class="section-heading">
-        <div><span class="eyebrow">Мир кампании</span><h2>Атлас Элдервейла</h2></div>
+        <div><span class="eyebrow">Мир кампании</span><h2 id="world-heading">Атлас мира</h2></div>
         <button class="primary-button" id="new-lore">＋ Новая запись</button>
       </div>
       <div class="world-layout">
@@ -506,6 +506,92 @@
         <section class="wide repeatable-editor"><div><strong>Товары</strong><button type="button" class="ghost-button" id="add-shop-item">＋ Товар</button></div><div id="shop-items-editor"></div></section>
       </div>
       <div class="modal-actions"><button type="button" class="delete" id="delete-shop">Удалить</button><button type="button" class="ghost-button" data-close-dialog="shop-dialog">Отмена</button><button value="default" class="primary-button">Сохранить магазин</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="master-login-dialog">
+    <form id="master-login-form">
+      <div class="modal-head"><div><span class="eyebrow">Кабинет мастера</span><h3 id="master-login-title">Вход в мастерскую</h3></div></div>
+      <div class="form-grid">
+        <label class="wide">Логин мастера<input name="username" autocomplete="username" placeholder="Для главного мастера можно оставить пустым"></label>
+        <label class="wide">Пароль<input name="password" type="password" autocomplete="current-password" required></label>
+      </div>
+      <small id="master-login-error"></small>
+      <div class="modal-actions"><button class="primary-button">Войти</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="master-register-dialog">
+    <form id="master-register-form">
+      <div class="modal-head"><div><span class="eyebrow">Приглашение мастера</span><h3>Создать свой кабинет</h3></div></div>
+      <div class="form-grid">
+        <label>Ваше имя<input name="displayName" required></label>
+        <label>Название кампании<input name="campaignName" required></label>
+        <label>Логин<input name="username" autocomplete="username" required></label>
+        <label>Пароль<input name="password" type="password" minlength="6" autocomplete="new-password" required></label>
+      </div>
+      <small id="master-register-error"></small>
+      <div class="modal-actions"><button class="primary-button">Создать кабинет</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="master-account-dialog">
+    <form id="master-account-form" class="master-account-shell">
+      <header class="master-account-head">
+        <div><span class="eyebrow">Личный кабинет</span><h2>Мастерская кампании</h2><p>Настройте настроение, подписи и главный экран своей хроники.</p></div>
+        <div><button type="button" class="delete" id="master-logout">Выйти</button><button class="primary-button">Сохранить изменения</button><button type="button" class="modal-close" data-close-dialog="master-account-dialog">×</button></div>
+      </header>
+      <div class="master-account-layout">
+        <div class="master-settings-column">
+          <section class="master-setting-card">
+            <div class="master-setting-title"><span>01</span><div><strong>Кампания и мастер</strong><small>Основные подписи кабинета</small></div></div>
+            <div class="master-setting-grid">
+              <label>Имя мастера<input name="displayName"></label>
+              <label>Название кампании<input name="campaignName" required></label>
+              <label>Глава / статус<input name="campaignChapter" placeholder="Глава III"></label>
+              <label>Приветствие<input name="greeting" placeholder="Добрый вечер"></label>
+              <label class="wide">Описание кампании<textarea name="campaignDescription"></textarea></label>
+            </div>
+          </section>
+          <section class="master-setting-card">
+            <div class="master-setting-title"><span>02</span><div><strong>Облик архива</strong><small>Название, цвет и мир</small></div></div>
+            <div class="master-setting-grid">
+              <label>Название сайта<input name="brandTitle" placeholder="Архив мастера"></label>
+              <label>Надпись над названием<input name="brandEyebrow" placeholder="Личная летопись"></label>
+              <label>Название атласа<input name="worldTitle" placeholder="Атлас мира"></label>
+              <label class="color-setting">Акцентный цвет<input name="accentColor" type="color" value="#d7aa5e"></label>
+            </div>
+          </section>
+          <section class="master-setting-card">
+            <div class="master-setting-title"><span>03</span><div><strong>Главный баннер</strong><small>Пустые поля подхватят ближайшую сессию</small></div></div>
+            <div class="master-setting-grid">
+              <label>Заголовок<input name="heroTitle" placeholder="Автоматически из ближайшей сессии"></label>
+              <label>Короткая подпись<input name="heroKicker" placeholder="Автоматически из ближайшей сессии"></label>
+              <label class="wide">Фоновое изображение<input name="heroImageUrl" placeholder="https://..."></label>
+              <label class="wide">Описание баннера<textarea name="heroDescription" placeholder="Автоматически из плана ближайшей сессии"></textarea></label>
+            </div>
+          </section>
+          <section class="master-setting-card master-invite-card">
+            <div class="master-setting-title"><span>04</span><div><strong>Пригласить другого мастера</strong><small>Он получит отдельный кабинет и собственную кампанию</small></div></div>
+            <div class="master-invite-controls"><input id="master-invite-name" placeholder="Имя мастера (необязательно)"><button type="button" id="create-master-invite">Создать и скопировать ссылку</button></div>
+            <code id="master-invite-link"></code>
+          </section>
+        </div>
+        <aside class="master-preview-column">
+          <span class="eyebrow">Живой предпросмотр</span>
+          <div class="master-preview" id="master-settings-preview">
+            <div class="master-preview-brand"><span>D20</span><div><small data-preview="brandEyebrow">Личная летопись</small><strong data-preview="brandTitle">Архив мастера</strong></div></div>
+            <div class="master-preview-campaign"><small>Текущая кампания</small><strong data-preview="campaignName">Моя кампания</strong><span data-preview="campaignChapter">Глава кампании</span></div>
+            <div class="master-preview-hero">
+              <small data-preview="heroKicker">Следующая игра</small>
+              <h3 data-preview="heroTitle">Название приключения</h3>
+              <p data-preview="heroDescription">Описание кампании и ближайшей сессии появится здесь.</p>
+            </div>
+            <div class="master-preview-footer"><span data-preview="worldTitle">Атлас мира</span><strong data-preview="displayName">Хранитель</strong></div>
+          </div>
+          <p class="master-preview-note">Предпросмотр обновляется сразу. На сайте изменения появятся после сохранения.</p>
+        </aside>
+      </div>
     </form>
   </dialog>
 

@@ -14,7 +14,8 @@ window.DndApp = (() => {
     shops: [],
     masterNotes: [],
     packs: [{ id: crypto.randomUUID(), name: "Первая группа", type: "Группа игроков" }],
-    noteSections: [{ id: crypto.randomUUID(), name: "Общие записи" }]
+    noteSections: [{ id: crypto.randomUUID(), name: "Общие записи" }],
+    campaignSettings: {}
   };
 
   const app = {
@@ -75,7 +76,7 @@ window.DndApp = (() => {
     d.characters ||= []; d.tasks ||= []; d.lore ||= []; d.inventory ||= []; d.initiative ||= []; d.sessions ||= []; d.bestiary ||= []; d.shops ||= [];
     d.combat ||= { active: false, round: 1, turnIndex: 0, participants: [] };
     d.combat.active ??= false; d.combat.round ||= 1; d.combat.turnIndex ||= 0; d.combat.participants ||= [];
-    d.masterNotes ||= []; d.packs ||= []; d.noteSections ||= [];
+    d.masterNotes ||= []; d.packs ||= []; d.noteSections ||= []; d.campaignSettings ||= {};
     if (!d.packs.length) d.packs.push({ id: crypto.randomUUID(), name: "Без группы", type: "Группа" });
     if (!d.noteSections.length) d.noteSections.push({ id: crypto.randomUUID(), name: "Общие записи" });
     const packByName = name => {

@@ -14,6 +14,7 @@ const app = express();
 const port = Number(process.env.PORT || 3000);
 const host = process.env.HOST || "0.0.0.0";
 const masterPassword = process.env.MASTER_PASSWORD || "master";
+const defaultCampaignId = "00000000-0000-0000-0000-000000000001";
 const databaseRetryAttempts = Math.max(1, Number(process.env.DB_RETRY_ATTEMPTS || 8));
 const databaseRetryDelay = Math.max(250, Number(process.env.DB_RETRY_DELAY_MS || 750));
 const databaseStartupAttempts = Math.max(databaseRetryAttempts, Number(process.env.DB_STARTUP_ATTEMPTS || 40));
@@ -268,7 +269,56 @@ async function initializeDatabase() {
       size_bytes INTEGER NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+    CREATE TABLE IF NOT EXISTS campaigns (
+      id UUID PRIMARY KEY,
+      name TEXT NOT NULL DEFAULT 'Моя кампания',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS campaign_states (
+      campaign_id UUID PRIMARY KEY REFERENCES campaigns(id) ON DELETE CASCADE,
+      data JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS campaign_state_backups (
+      id BIGSERIAL PRIMARY KEY,
+      campaign_id UUID NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+      data JSONB NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS master_accounts (
+      id BIGSERIAL PRIMARY KEY,
+      username TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      password_salt TEXT NOT NULL,
+      display_name TEXT NOT NULL DEFAULT '',
+      campaign_id UUID NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+      enabled BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS master_invitations (
+      token_hash TEXT PRIMARY KEY,
+      display_name TEXT NOT NULL DEFAULT '',
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    ALTER TABLE master_sessions ADD COLUMN IF NOT EXISTS master_id BIGINT;
+    ALTER TABLE master_sessions ADD COLUMN IF NOT EXISTS campaign_id UUID;
+    ALTER TABLE player_accounts ADD COLUMN IF NOT EXISTS campaign_id UUID;
+    ALTER TABLE player_invitations ADD COLUMN IF NOT EXISTS campaign_id UUID;
+    ALTER TABLE media_assets ADD COLUMN IF NOT EXISTS campaign_id UUID;
+    CREATE INDEX IF NOT EXISTS player_accounts_campaign_idx ON player_accounts(campaign_id);
+    CREATE INDEX IF NOT EXISTS player_invitations_campaign_idx ON player_invitations(campaign_id);
+    CREATE INDEX IF NOT EXISTS media_assets_campaign_idx ON media_assets(campaign_id);
+    CREATE INDEX IF NOT EXISTS campaign_state_backups_campaign_idx ON campaign_state_backups(campaign_id, created_at DESC);
   `, [], databaseStartupAttempts);
+  await queryWithRetry("INSERT INTO campaigns (id, name) VALUES ($1, 'Основная кампания') ON CONFLICT (id) DO NOTHING", [defaultCampaignId], databaseStartupAttempts);
+  await queryWithRetry("INSERT INTO campaign_states (campaign_id, data) SELECT $1, data FROM campaign_state WHERE id = 1 ON CONFLICT (campaign_id) DO NOTHING", [defaultCampaignId], databaseStartupAttempts);
+  await queryWithRetry("UPDATE master_sessions SET campaign_id = $1 WHERE campaign_id IS NULL", [defaultCampaignId], databaseStartupAttempts);
+  await queryWithRetry("UPDATE player_accounts SET campaign_id = $1 WHERE campaign_id IS NULL", [defaultCampaignId], databaseStartupAttempts);
+  await queryWithRetry("UPDATE player_invitations SET campaign_id = $1 WHERE campaign_id IS NULL", [defaultCampaignId], databaseStartupAttempts);
+  await queryWithRetry("UPDATE media_assets SET campaign_id = $1 WHERE campaign_id IS NULL", [defaultCampaignId], databaseStartupAttempts);
 }
 
 const sessionLifetime = 7 * 24 * 60 * 60 * 1000;
@@ -308,7 +358,7 @@ async function getPlayer(req) {
   const token = parseCookies(req).dnd_player_session;
   if (!token) return null;
   const result = await queryWithRetry(
-    `SELECT a.id, a.username, a.character_id, a.display_name, a.enabled
+    `SELECT a.id, a.username, a.character_id, a.display_name, a.enabled, a.campaign_id
      FROM player_sessions s JOIN player_accounts a ON a.id = s.player_id
      WHERE s.token_hash = $1 AND s.expires_at > NOW()`,
     [hashToken(token)]
@@ -332,10 +382,14 @@ async function requireMaster(req, res, next) {
     const token = parseCookies(req).dnd_master_session;
     if (!token) return res.status(401).json({ error: "Требуется вход мастера" });
     const result = await queryWithRetry(
-      "SELECT token_hash FROM master_sessions WHERE token_hash = $1 AND expires_at > NOW()",
+      `SELECT s.token_hash, s.master_id, s.campaign_id, a.username, a.display_name, a.enabled
+       FROM master_sessions s LEFT JOIN master_accounts a ON a.id = s.master_id
+       WHERE s.token_hash = $1 AND s.expires_at > NOW()`,
       [hashToken(token)]
     );
     if (!result.rowCount) return res.status(401).json({ error: "Требуется вход мастера" });
+    if (result.rows[0].master_id && result.rows[0].enabled !== true) return res.status(401).json({ error: "Кабинет мастера отключён" });
+    req.master = result.rows[0];
     next();
   } catch (error) {
     databaseErrorResponse(res, error);
@@ -418,11 +472,11 @@ async function updateCombatAsPlayer(player, action) {
   try {
     client = await connectWithRetry();
     await client.query("BEGIN");
-    const result = await client.query("SELECT data FROM campaign_state WHERE id = 1 FOR UPDATE");
+    const result = await client.query("SELECT data FROM campaign_states WHERE campaign_id = $1 FOR UPDATE", [player.campaign_id]);
     if (!result.rowCount) throw new Error("State is not initialized");
     const state = result.rows[0].data;
     const response = action(state, player.character_id);
-    await client.query("UPDATE campaign_state SET data = $1, updated_at = NOW() WHERE id = 1", [state]);
+    await client.query("UPDATE campaign_states SET data = $1, updated_at = NOW() WHERE campaign_id = $2", [state, player.campaign_id]);
     await client.query("COMMIT");
     broadcastStateChanged();
     return response;
@@ -435,8 +489,8 @@ async function updateCombatAsPlayer(player, action) {
   }
 }
 
-async function loadState() {
-  const result = await queryWithRetry("SELECT data FROM campaign_state WHERE id = 1");
+async function loadState(campaignId = defaultCampaignId) {
+  const result = await queryWithRetry("SELECT data FROM campaign_states WHERE campaign_id = $1", [campaignId]);
   return result.rows[0]?.data || null;
 }
 
@@ -450,6 +504,25 @@ app.get("/api/health", async (_req, res) => {
 });
 
 app.post("/api/master/login", loginRateLimit, async (req, res) => {
+  const username = String(req.body?.username || "").trim().toLowerCase();
+  const accountPassword = String(req.body?.password || "");
+  if (username) {
+    try {
+      const result = await queryWithRetry("SELECT * FROM master_accounts WHERE username = $1 AND enabled = TRUE", [username]);
+      const account = result.rows[0];
+      if (!account || !(await verifyPassword(accountPassword, account.password_salt, account.password_hash))) {
+        return res.status(401).json({ error: "Неверный логин или пароль мастера" });
+      }
+      const token = crypto.randomBytes(32).toString("base64url");
+      await queryWithRetry("DELETE FROM master_sessions WHERE expires_at <= NOW()");
+      await queryWithRetry("INSERT INTO master_sessions (token_hash, master_id, campaign_id, expires_at) VALUES ($1, $2, $3, $4)", [hashToken(token), account.id, account.campaign_id, new Date(Date.now() + sessionLifetime)]);
+      clearLoginAttempts(req);
+      res.setHeader("Set-Cookie", sessionCookie(req, "dnd_master_session", encodeURIComponent(token), sessionLifetime / 1000));
+      return res.json({ ok: true });
+    } catch (error) {
+      return databaseErrorResponse(res, error);
+    }
+  }
   const supplied = Buffer.from(String(req.body?.password || ""));
   const expected = Buffer.from(masterPassword);
   if (supplied.length !== expected.length || !crypto.timingSafeEqual(supplied, expected)) {
@@ -458,7 +531,7 @@ app.post("/api/master/login", loginRateLimit, async (req, res) => {
   try {
     const token = crypto.randomBytes(32).toString("base64url");
     await queryWithRetry("DELETE FROM master_sessions WHERE expires_at <= NOW()");
-    await queryWithRetry("INSERT INTO master_sessions (token_hash, expires_at) VALUES ($1, $2)", [hashToken(token), new Date(Date.now() + sessionLifetime)]);
+    await queryWithRetry("INSERT INTO master_sessions (token_hash, campaign_id, expires_at) VALUES ($1, $2, $3)", [hashToken(token), defaultCampaignId, new Date(Date.now() + sessionLifetime)]);
     clearLoginAttempts(req);
     res.setHeader("Set-Cookie", sessionCookie(req, "dnd_master_session", encodeURIComponent(token), sessionLifetime / 1000));
     res.json({ ok: true });
@@ -478,9 +551,9 @@ app.post("/api/master/logout", requireMaster, async (req, res) => {
   }
 });
 
-app.get("/api/state", requireMaster, async (_req, res) => {
+app.get("/api/state", requireMaster, async (req, res) => {
   try {
-    const result = await queryWithRetry("SELECT data, updated_at FROM campaign_state WHERE id = 1");
+    const result = await queryWithRetry("SELECT data, updated_at FROM campaign_states WHERE campaign_id = $1", [req.master.campaign_id]);
     if (!result.rowCount) return res.status(404).json({ error: "State is not initialized" });
     res.json(result.rows[0]);
   } catch (error) {
@@ -514,16 +587,16 @@ app.put("/api/state", requireMaster, async (req, res) => {
   try {
     client = await connectWithRetry();
     await client.query("BEGIN");
-    await client.query("INSERT INTO campaign_backups (data) SELECT data FROM campaign_state WHERE id = 1");
+    await client.query("INSERT INTO campaign_state_backups (campaign_id, data) SELECT campaign_id, data FROM campaign_states WHERE campaign_id = $1", [req.master.campaign_id]);
     await client.query(
-      `INSERT INTO campaign_state (id, data, updated_at) VALUES (1, $1, NOW())
-       ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()`,
-      [req.body]
+      `INSERT INTO campaign_states (campaign_id, data, updated_at) VALUES ($1, $2, NOW())
+       ON CONFLICT (campaign_id) DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()`,
+      [req.master.campaign_id, req.body]
     );
     await client.query(`
-      DELETE FROM campaign_backups
-      WHERE id NOT IN (SELECT id FROM campaign_backups ORDER BY created_at DESC LIMIT 30)
-    `);
+      DELETE FROM campaign_state_backups
+      WHERE campaign_id = $1 AND id NOT IN (SELECT id FROM campaign_state_backups WHERE campaign_id = $1 ORDER BY created_at DESC LIMIT 30)
+    `, [req.master.campaign_id]);
     await client.query("COMMIT");
     broadcastStateChanged();
     res.json({ ok: true });
@@ -538,19 +611,20 @@ app.put("/api/state", requireMaster, async (req, res) => {
   }
 });
 
-app.get("/api/backups", requireMaster, async (_req, res) => {
+app.get("/api/backups", requireMaster, async (req, res) => {
   try {
-    const result = await queryWithRetry("SELECT id, created_at FROM campaign_backups ORDER BY created_at DESC LIMIT 30");
+    const result = await queryWithRetry("SELECT id, created_at FROM campaign_state_backups WHERE campaign_id = $1 ORDER BY created_at DESC LIMIT 30", [req.master.campaign_id]);
     res.json(result.rows);
   } catch (error) {
     databaseErrorResponse(res, error);
   }
 });
 
-app.get("/api/master/player-accounts", requireMaster, async (_req, res) => {
+app.get("/api/master/player-accounts", requireMaster, async (req, res) => {
   try {
     const result = await queryWithRetry(
-      "SELECT id, username, character_id, display_name, enabled, updated_at FROM player_accounts ORDER BY username"
+      "SELECT id, username, character_id, display_name, enabled, updated_at FROM player_accounts WHERE campaign_id = $1 ORDER BY username",
+      [req.master.campaign_id]
     );
     res.json(result.rows);
   } catch (error) {
@@ -558,10 +632,72 @@ app.get("/api/master/player-accounts", requireMaster, async (_req, res) => {
   }
 });
 
+app.get("/api/master/me", requireMaster, async (req, res) => {
+  try {
+    const campaign = await queryWithRetry("SELECT id, name FROM campaigns WHERE id = $1", [req.master.campaign_id]);
+    res.json({ account: { username: req.master.username || "owner", displayName: req.master.display_name || "Главный мастер", legacy: !req.master.master_id }, campaign: campaign.rows[0] });
+  } catch (error) { databaseErrorResponse(res, error); }
+});
+
+app.patch("/api/master/me", requireMaster, async (req, res) => {
+  const displayName = String(req.body?.displayName || "").trim().slice(0, 120);
+  const campaignName = String(req.body?.campaignName || "").trim().slice(0, 160);
+  try {
+    if (campaignName) await queryWithRetry("UPDATE campaigns SET name = $1, updated_at = NOW() WHERE id = $2", [campaignName, req.master.campaign_id]);
+    if (req.master.master_id && displayName) await queryWithRetry("UPDATE master_accounts SET display_name = $1, updated_at = NOW() WHERE id = $2", [displayName, req.master.master_id]);
+    res.json({ ok: true });
+  } catch (error) { databaseErrorResponse(res, error); }
+});
+
+app.post("/api/master/invitations", requireMaster, async (req, res) => {
+  const token = crypto.randomBytes(24).toString("base64url");
+  const displayName = String(req.body?.displayName || "").trim().slice(0, 120);
+  const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+  try {
+    await queryWithRetry("INSERT INTO master_invitations (token_hash, display_name, expires_at) VALUES ($1, $2, $3)", [hashToken(token), displayName, expiresAt]);
+    res.json({ token, expiresAt });
+  } catch (error) { databaseErrorResponse(res, error); }
+});
+
+app.post("/api/master/register", loginRateLimit, async (req, res) => {
+  const token = String(req.body?.token || "");
+  const username = String(req.body?.username || "").trim().toLowerCase();
+  const password = String(req.body?.password || "");
+  const requestedName = String(req.body?.displayName || "").trim().slice(0, 120);
+  const campaignName = String(req.body?.campaignName || "").trim().slice(0, 160) || "Новая кампания";
+  if (!/^[a-z0-9_.-]{3,40}$/i.test(username)) return res.status(400).json({ error: "Логин: 3–40 латинских символов, цифр, точек, дефисов или подчёркиваний" });
+  if (password.length < 6) return res.status(400).json({ error: "Пароль должен содержать минимум 6 символов" });
+  let client;
+  try {
+    client = await connectWithRetry();
+    await client.query("BEGIN");
+    const inviteResult = await client.query("SELECT * FROM master_invitations WHERE token_hash = $1 AND expires_at > NOW() FOR UPDATE", [hashToken(token)]);
+    const invitation = inviteResult.rows[0];
+    if (!invitation) { await client.query("ROLLBACK"); return res.status(404).json({ error: "Приглашение недействительно или уже использовано" }); }
+    const campaignId = crypto.randomUUID();
+    const credentials = await hashPassword(password);
+    const displayName = requestedName || invitation.display_name || username;
+    await client.query("INSERT INTO campaigns (id, name) VALUES ($1, $2)", [campaignId, campaignName]);
+    const account = await client.query(`INSERT INTO master_accounts (username, password_hash, password_salt, display_name, campaign_id) VALUES ($1, $2, $3, $4, $5) RETURNING id`, [username, credentials.hash, credentials.salt, displayName, campaignId]);
+    await client.query("DELETE FROM master_invitations WHERE token_hash = $1", [hashToken(token)]);
+    const sessionToken = crypto.randomBytes(32).toString("base64url");
+    await client.query("INSERT INTO master_sessions (token_hash, master_id, campaign_id, expires_at) VALUES ($1, $2, $3, $4)", [hashToken(sessionToken), account.rows[0].id, campaignId, new Date(Date.now() + sessionLifetime)]);
+    await client.query("COMMIT");
+    clearLoginAttempts(req);
+    res.setHeader("Set-Cookie", sessionCookie(req, "dnd_master_session", sessionToken, Math.floor(sessionLifetime / 1000)));
+    res.json({ ok: true });
+  } catch (error) {
+    try { if (client) await client.query("ROLLBACK"); } catch {}
+    if (error.code === "23505") return res.status(409).json({ error: "Этот логин уже занят" });
+    databaseErrorResponse(res, error);
+  } finally { if (client) client.release(); }
+});
+
 app.get("/api/master/player-invitations", requireMaster, async (_req, res) => {
   try {
     const result = await queryWithRetry(
-      "SELECT token_hash AS id, display_name, expires_at, created_at FROM player_invitations WHERE expires_at > NOW() ORDER BY created_at DESC"
+      "SELECT token_hash AS id, display_name, expires_at, created_at FROM player_invitations WHERE campaign_id = $1 AND expires_at > NOW() ORDER BY created_at DESC",
+      [req.master.campaign_id]
     );
     res.json(result.rows);
   } catch (error) {
@@ -575,8 +711,8 @@ app.post("/api/master/player-invitations", requireMaster, async (req, res) => {
   const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
   try {
     await queryWithRetry(
-      "INSERT INTO player_invitations (token_hash, display_name, expires_at) VALUES ($1, $2, $3)",
-      [hashToken(token), displayName, expiresAt]
+      "INSERT INTO player_invitations (token_hash, display_name, expires_at, campaign_id) VALUES ($1, $2, $3, $4)",
+      [hashToken(token), displayName, expiresAt, req.master.campaign_id]
     );
     res.json({ token, displayName, expiresAt });
   } catch (error) {
@@ -586,7 +722,7 @@ app.post("/api/master/player-invitations", requireMaster, async (req, res) => {
 
 app.delete("/api/master/player-invitations/:id", requireMaster, async (req, res) => {
   try {
-    await queryWithRetry("DELETE FROM player_invitations WHERE token_hash = $1", [req.params.id]);
+    await queryWithRetry("DELETE FROM player_invitations WHERE token_hash = $1 AND campaign_id = $2", [req.params.id, req.master.campaign_id]);
     res.json({ ok: true });
   } catch (error) {
     databaseErrorResponse(res, error);
@@ -596,8 +732,8 @@ app.delete("/api/master/player-invitations/:id", requireMaster, async (req, res)
 app.patch("/api/master/player-accounts/:id", requireMaster, async (req, res) => {
   try {
     await queryWithRetry(
-      "UPDATE player_accounts SET enabled = $1, updated_at = NOW() WHERE id = $2",
-      [req.body?.enabled === true, req.params.id]
+      "UPDATE player_accounts SET enabled = $1, updated_at = NOW() WHERE id = $2 AND campaign_id = $3",
+      [req.body?.enabled === true, req.params.id, req.master.campaign_id]
     );
     res.json({ ok: true });
   } catch (error) {
@@ -614,9 +750,9 @@ function hasValidImageSignature(buffer, mimeType) {
   return false;
 }
 
-app.get("/api/master/images", requireMaster, async (_req, res) => {
+app.get("/api/master/images", requireMaster, async (req, res) => {
   try {
-    const result = await queryWithRetry("SELECT id, original_name, title, category, mime_type, size_bytes, created_at, '/uploads/images/' || filename AS url FROM media_assets ORDER BY created_at DESC");
+    const result = await queryWithRetry("SELECT id, original_name, title, category, mime_type, size_bytes, created_at, '/uploads/images/' || filename AS url FROM media_assets WHERE campaign_id = $1 ORDER BY created_at DESC", [req.master.campaign_id]);
     res.json(result.rows);
   } catch (error) {
     databaseErrorResponse(res, error);
@@ -633,7 +769,7 @@ app.post("/api/master/images", requireMaster, express.raw({ type: Object.keys(im
   const category = String(req.headers["x-image-category"] || "other").slice(0, 40);
   try {
     await fs.promises.writeFile(path.join(uploadsDirectory, filename), req.body);
-    await queryWithRetry("INSERT INTO media_assets (id, filename, original_name, title, category, mime_type, size_bytes) VALUES ($1,$2,$3,$4,$5,$6,$7)", [id, filename, originalName, title, category, req.headers["content-type"], req.body.length]);
+    await queryWithRetry("INSERT INTO media_assets (id, filename, original_name, title, category, mime_type, size_bytes, campaign_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)", [id, filename, originalName, title, category, req.headers["content-type"], req.body.length, req.master.campaign_id]);
     res.json({ id, original_name: originalName, title, category, mime_type: req.headers["content-type"], size_bytes: req.body.length, url: `/uploads/images/${filename}` });
   } catch (error) {
     await fs.promises.rm(path.join(uploadsDirectory, filename), { force: true }).catch(() => {});
@@ -643,7 +779,7 @@ app.post("/api/master/images", requireMaster, express.raw({ type: Object.keys(im
 
 app.delete("/api/master/images/:id", requireMaster, async (req, res) => {
   try {
-    const result = await queryWithRetry("DELETE FROM media_assets WHERE id = $1 RETURNING filename", [req.params.id]);
+    const result = await queryWithRetry("DELETE FROM media_assets WHERE id = $1 AND campaign_id = $2 RETURNING filename", [req.params.id, req.master.campaign_id]);
     if (result.rows[0]) await fs.promises.rm(path.join(uploadsDirectory, result.rows[0].filename), { force: true });
     res.json({ ok: true });
   } catch (error) {
@@ -661,21 +797,23 @@ app.put("/api/master/player-accounts/:characterId", requireMaster, async (req, r
     return res.status(400).json({ error: "Логин: 3–40 латинских символов, цифр, точек, дефисов или подчёркиваний" });
   }
   try {
-    const existing = await queryWithRetry("SELECT id FROM player_accounts WHERE character_id = $1", [characterId]);
+    const state = await loadState(req.master.campaign_id);
+    if (!state?.characters?.some(character => character.id === characterId)) return res.status(404).json({ error: "Персонаж не найден в вашей кампании" });
+    const existing = await queryWithRetry("SELECT id FROM player_accounts WHERE character_id = $1 AND campaign_id = $2", [characterId, req.master.campaign_id]);
     if (!existing.rowCount && password.length < 6) return res.status(400).json({ error: "Для нового входа нужен пароль минимум из 6 символов" });
     if (password) {
       const credentials = await hashPassword(password);
       await queryWithRetry(
-        `INSERT INTO player_accounts (username, password_hash, password_salt, character_id, display_name, enabled)
-         VALUES ($1, $2, $3, $4, $5, $6)
+        `INSERT INTO player_accounts (username, password_hash, password_salt, character_id, display_name, enabled, campaign_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
          ON CONFLICT (character_id) DO UPDATE SET username = EXCLUDED.username, password_hash = EXCLUDED.password_hash,
          password_salt = EXCLUDED.password_salt, display_name = EXCLUDED.display_name, enabled = EXCLUDED.enabled, updated_at = NOW()`,
-        [username, credentials.hash, credentials.salt, characterId, displayName, enabled]
+        [username, credentials.hash, credentials.salt, characterId, displayName, enabled, req.master.campaign_id]
       );
     } else {
       await queryWithRetry(
-        "UPDATE player_accounts SET username = $1, display_name = $2, enabled = $3, updated_at = NOW() WHERE character_id = $4",
-        [username, displayName, enabled, characterId]
+        "UPDATE player_accounts SET username = $1, display_name = $2, enabled = $3, updated_at = NOW() WHERE character_id = $4 AND campaign_id = $5",
+        [username, displayName, enabled, characterId, req.master.campaign_id]
       );
     }
     res.json({ ok: true });
@@ -687,7 +825,7 @@ app.put("/api/master/player-accounts/:characterId", requireMaster, async (req, r
 
 app.delete("/api/master/player-accounts/:characterId", requireMaster, async (req, res) => {
   try {
-    await queryWithRetry("DELETE FROM player_accounts WHERE character_id = $1", [req.params.characterId]);
+    await queryWithRetry("DELETE FROM player_accounts WHERE character_id = $1 AND campaign_id = $2", [req.params.characterId, req.master.campaign_id]);
     res.json({ ok: true });
   } catch (error) {
     databaseErrorResponse(res, error);
@@ -739,12 +877,12 @@ app.post("/api/player/register", loginRateLimit, async (req, res) => {
       await client.query("ROLLBACK");
       return res.status(404).json({ error: "Приглашение недействительно или уже использовано" });
     }
-    const stateResult = await client.query("SELECT data FROM campaign_state WHERE id = 1 FOR UPDATE");
+    const stateResult = await client.query("SELECT data FROM campaign_states WHERE campaign_id = $1 FOR UPDATE", [invitation.campaign_id]);
     const state = stateResult.rows[0]?.data;
     if (!state) throw new Error("Campaign state is not initialized");
     const displayName = requestedName || invitation.display_name || username;
     const characterId = crypto.randomUUID();
-    await client.query("INSERT INTO campaign_backups (data) SELECT data FROM campaign_state WHERE id = 1");
+    await client.query("INSERT INTO campaign_state_backups (campaign_id, data) SELECT campaign_id, data FROM campaign_states WHERE campaign_id = $1", [invitation.campaign_id]);
     const character = {
       id: characterId, kind: "player", name: "Новый персонаж", player: displayName,
       packId: state.packs?.[0]?.id || "", group: state.packs?.[0]?.name || "",
@@ -761,11 +899,11 @@ app.post("/api/player/register", loginRateLimit, async (req, res) => {
     state.characters.push(character);
     const credentials = await hashPassword(password);
     const accountResult = await client.query(
-      `INSERT INTO player_accounts (username, password_hash, password_salt, character_id, display_name, enabled)
-       VALUES ($1, $2, $3, $4, $5, TRUE) RETURNING id`,
-      [username, credentials.hash, credentials.salt, characterId, displayName]
+      `INSERT INTO player_accounts (username, password_hash, password_salt, character_id, display_name, enabled, campaign_id)
+       VALUES ($1, $2, $3, $4, $5, TRUE, $6) RETURNING id`,
+      [username, credentials.hash, credentials.salt, characterId, displayName, invitation.campaign_id]
     );
-    await client.query("UPDATE campaign_state SET data = $1, updated_at = NOW() WHERE id = 1", [state]);
+    await client.query("UPDATE campaign_states SET data = $1, updated_at = NOW() WHERE campaign_id = $2", [state, invitation.campaign_id]);
     await client.query("DELETE FROM player_invitations WHERE token_hash = $1", [hashToken(token)]);
     const sessionToken = crypto.randomBytes(32).toString("base64url");
     await client.query(
@@ -799,7 +937,7 @@ app.post("/api/player/logout", async (req, res) => {
 
 app.get("/api/player/data", requirePlayer, async (req, res) => {
   try {
-    const state = await loadState();
+    const state = await loadState(req.player.campaign_id);
     const character = state?.characters?.find(item => item.id === req.player.character_id);
     if (!character || character.playerAccessEnabled !== true) return res.status(403).json({ error: "Мастер пока не открыл доступ к листу" });
     const notesResult = await queryWithRetry("SELECT body FROM player_notes WHERE player_id = $1", [req.player.id]);
@@ -817,7 +955,7 @@ app.get("/api/player/data", requirePlayer, async (req, res) => {
 
 app.get("/api/player/combat", requirePlayer, async (req, res) => {
   try {
-    res.json(publicCombatForPlayer(await loadState(), req.player.character_id));
+    res.json(publicCombatForPlayer(await loadState(req.player.campaign_id), req.player.character_id));
   } catch (error) {
     databaseErrorResponse(res, error);
   }
@@ -931,7 +1069,7 @@ app.put("/api/player/character", requirePlayer, async (req, res) => {
   try {
     client = await connectWithRetry();
     await client.query("BEGIN");
-    const result = await client.query("SELECT data FROM campaign_state WHERE id = 1 FOR UPDATE");
+    const result = await client.query("SELECT data FROM campaign_states WHERE campaign_id = $1 FOR UPDATE", [req.player.campaign_id]);
     const state = result.rows[0]?.data;
     const index = state?.characters?.findIndex(item => item.id === req.player.character_id);
     if (index == null || index < 0 || state.characters[index].playerAccessEnabled !== true) {
@@ -941,8 +1079,8 @@ app.put("/api/player/character", requirePlayer, async (req, res) => {
     Object.assign(state.characters[index], sanitizePlayerCharacterUpdate(req.body));
     state.characters[index].maxHp = Math.max(0, Number(state.characters[index].maxHp || 0));
     state.characters[index].hp = clampNumber(state.characters[index].hp, 0, state.characters[index].maxHp);
-    await client.query("INSERT INTO campaign_backups (data) VALUES ($1)", [result.rows[0].data]);
-    await client.query("UPDATE campaign_state SET data = $1, updated_at = NOW() WHERE id = 1", [state]);
+    await client.query("INSERT INTO campaign_state_backups (campaign_id, data) VALUES ($1, $2)", [req.player.campaign_id, result.rows[0].data]);
+    await client.query("UPDATE campaign_states SET data = $1, updated_at = NOW() WHERE campaign_id = $2", [state, req.player.campaign_id]);
     await client.query("COMMIT");
     broadcastStateChanged();
     res.json({ ok: true, character: publicCharacter(state.characters[index]) });

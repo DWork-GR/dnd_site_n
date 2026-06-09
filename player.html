@@ -47,8 +47,14 @@
       </aside>
       <header class="player-header">
         <div class="character-emblem"><span>D20</span><img id="player-portrait" alt="Портрет персонажа"></div>
-        <div class="player-heading"><span class="eyebrow">Личный архив героя</span><h1 id="character-title">Персонаж</h1><small id="sync-status">Синхронизировано</small></div>
+        <div class="player-heading"><span class="eyebrow">Личный архив героя</span><h1 id="character-title">Персонаж</h1><p id="character-subtitle">История героя продолжается</p><small id="sync-status">Синхронизировано</small></div>
         <div class="header-actions"><button id="save-character">Сохранить изменения</button><button class="quiet" id="logout">Выйти</button></div>
+        <div class="player-quickbar">
+          <div><span>Уровень</span><strong id="quick-level">1</strong></div>
+          <div><span>Класс</span><strong id="quick-class">Без класса</strong></div>
+          <div><span>Здоровье</span><strong id="quick-hp">10 / 10</strong></div>
+          <div><span>Золото</span><strong id="quick-gold">0</strong></div>
+        </div>
       </header>
 
       <nav class="tabs">
@@ -171,6 +177,12 @@
       </section>
     </section>
   </main>
+  <dialog id="player-lore-dialog" class="player-lore-dialog">
+    <article>
+      <button type="button" class="player-lore-close" id="close-player-lore" aria-label="Закрыть">×</button>
+      <div id="player-lore-detail"></div>
+    </article>
+  </dialog>
   <script src="assets/js/rich-text.js"></script>
   <script src="assets/js/player.js"></script>
 </body>
