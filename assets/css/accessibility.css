@@ -1,0 +1,227 @@
+/*
+ * Единый слой читаемости.
+ * Подключается последним, поэтому здесь удобно менять размеры текста всего сайта.
+ */
+:root {
+  --font-meta: 14px;
+  --font-body: 16px;
+  --font-body-large: 18px;
+}
+
+body {
+  font-size: var(--font-body);
+  line-height: 1.6;
+}
+
+/* Основной текст и элементы управления */
+body :where(p, li, td, input, select, textarea, button, label) {
+  font-size: var(--font-body) !important;
+  line-height: 1.55;
+}
+
+body :where(span, small, a, th, legend, em) {
+  font-size: var(--font-meta) !important;
+  line-height: 1.5;
+}
+
+body :where(strong, b) {
+  font-size: var(--font-body) !important;
+  line-height: 1.45;
+}
+
+/* Дополнительный текст: подписи, теги, счётчики и пояснения */
+body
+  :where(
+    small,
+    .eyebrow,
+    .tag,
+    .counter,
+    .storage-status,
+    .character-head p,
+    .character-foot,
+    .level,
+    .char-stats span,
+    .lore-open,
+    .lore-audience,
+    .hptext,
+    .session-info span,
+    .session-info small,
+    .difficulty span,
+    .difficulty small
+  ) {
+  font-size: var(--font-meta) !important;
+  line-height: 1.5;
+}
+
+/* Заголовки плавно меняются вместе с шириной экрана */
+h1 {
+  font-size: clamp(26px, 2.4vw, 38px) !important;
+}
+
+h2 {
+  font-size: clamp(25px, 2.2vw, 34px) !important;
+}
+
+h3 {
+  font-size: clamp(20px, 1.7vw, 27px) !important;
+}
+
+h4 {
+  font-size: clamp(18px, 1.4vw, 22px) !important;
+}
+
+/* Карточки и длинные тексты должны читаться как обычный текст, а не как подписи */
+.hero-copy p,
+.lore-card-excerpt,
+.lore-view-text,
+.npc-card-preview,
+.npc-view-section,
+.player-lore-detail-text,
+.player-npc-sections,
+.known-npc-card p,
+.task,
+.note-editor input,
+.note-editor textarea,
+.party-row strong,
+td {
+  font-size: var(--font-body) !important;
+}
+
+.character-head h3,
+.lore-card h3,
+.known-npc-card h4 {
+  font-size: var(--font-body-large) !important;
+}
+
+input,
+select,
+textarea,
+button {
+  min-height: 44px;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  min-height: auto;
+}
+
+textarea {
+  line-height: 1.65 !important;
+}
+
+/* При увеличенном тексте карточкам нужно больше свободного места */
+.character-grid,
+.stats-grid,
+.media-gallery,
+.known-npc-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+
+.character-card,
+.lore-card,
+.panel,
+.stat-card {
+  min-width: 0;
+}
+
+.character-foot,
+.panel-head,
+.section-heading,
+.top-actions,
+.modal-actions {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.table-panel,
+.calendar-panel {
+  overflow-x: auto;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-grid,
+  .world-layout,
+  .notes-layout,
+  .npc-view-facts,
+  .npc-view-grid,
+  .player-npc-sections {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .topbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .top-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 800px) {
+  :root {
+    --font-body: 16px;
+    --font-body-large: 18px;
+  }
+
+  .page,
+  .player-main,
+  .tab-page {
+    padding-inline: clamp(14px, 4vw, 24px);
+  }
+
+  .top-actions > *,
+  .modal-actions > *,
+  .section-heading > button,
+  .section-title > button {
+    flex: 1 1 180px;
+  }
+
+  .sheet-tabs,
+  .filter-row {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 6px;
+  }
+
+  .sheet-tabs button,
+  .filter-row button {
+    flex: 0 0 auto;
+  }
+
+  .npc-view-head,
+  .player-npc-head {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 560px) {
+  .character-grid,
+  .stats-grid,
+  .media-gallery,
+  .known-npc-grid,
+  .npc-fields,
+  .npc-publication fieldset,
+  .quick-stats,
+  .coins-row,
+  .spell-slots {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .known-npc-card {
+    grid-template-columns: 80px minmax(0, 1fr);
+  }
+
+  .known-npc-card > img,
+  .known-npc-silhouette {
+    width: 80px;
+    height: 110px;
+  }
+
+  dialog {
+    width: calc(100% - 10px) !important;
+    max-height: 96vh !important;
+  }
+}
