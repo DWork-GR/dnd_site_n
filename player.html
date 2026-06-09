@@ -22,6 +22,13 @@
         <label>Пароль<input name="password" type="password" autocomplete="current-password" required></label>
         <button>Открыть свой лист</button>
       </form>
+      <form id="register-form" class="hidden">
+        <label>Ваше имя<input name="displayName" autocomplete="name" placeholder="Как мастер будет вас видеть"></label>
+        <label>Придумайте логин<input name="username" autocomplete="username" required></label>
+        <label>Придумайте пароль<input name="password" type="password" autocomplete="new-password" minlength="6" required></label>
+        <button>Создать аккаунт и лист</button>
+      </form>
+      <button type="button" class="login-switch hidden" id="show-login">У меня уже есть аккаунт</button>
       <small class="error" id="login-error"></small>
     </section>
 

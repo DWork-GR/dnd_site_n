@@ -111,6 +111,17 @@
       <div class="filter-row" id="character-filters">
         <button class="filter active" data-group="all">Все герои</button>
       </div>
+      <section class="player-roster-panel">
+        <div class="panel-head"><div><span class="eyebrow">Самостоятельный вход</span><h3>Игроки и приглашения</h3></div></div>
+        <form id="player-invite-form" class="player-invite-form">
+          <input id="player-invite-name" placeholder="Имя игрока (необязательно)">
+          <button class="primary-button">Создать ссылку-приглашение</button>
+        </form>
+        <small>Каждая ссылка одноразовая и действует 14 дней. Зарегистрировавшийся игрок получит собственный пустой лист.</small>
+        <div id="player-invite-result" class="player-invite-result hidden"></div>
+        <div id="player-account-roster" class="player-account-roster"></div>
+        <div id="player-invitation-list" class="player-account-roster"></div>
+      </section>
       <div class="character-grid" id="character-grid"></div>
     </section>
 

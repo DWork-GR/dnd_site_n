@@ -238,6 +238,12 @@ async function initializeDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+    CREATE TABLE IF NOT EXISTS player_invitations (
+      token_hash TEXT PRIMARY KEY,
+      display_name TEXT NOT NULL DEFAULT '',
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
     CREATE TABLE IF NOT EXISTS player_sessions (
       token_hash TEXT PRIMARY KEY,
       player_id BIGINT NOT NULL REFERENCES player_accounts(id) ON DELETE CASCADE,
@@ -552,6 +558,53 @@ app.get("/api/master/player-accounts", requireMaster, async (_req, res) => {
   }
 });
 
+app.get("/api/master/player-invitations", requireMaster, async (_req, res) => {
+  try {
+    const result = await queryWithRetry(
+      "SELECT token_hash AS id, display_name, expires_at, created_at FROM player_invitations WHERE expires_at > NOW() ORDER BY created_at DESC"
+    );
+    res.json(result.rows);
+  } catch (error) {
+    databaseErrorResponse(res, error);
+  }
+});
+
+app.post("/api/master/player-invitations", requireMaster, async (req, res) => {
+  const displayName = String(req.body?.displayName || "").trim().slice(0, 120);
+  const token = crypto.randomBytes(24).toString("base64url");
+  const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+  try {
+    await queryWithRetry(
+      "INSERT INTO player_invitations (token_hash, display_name, expires_at) VALUES ($1, $2, $3)",
+      [hashToken(token), displayName, expiresAt]
+    );
+    res.json({ token, displayName, expiresAt });
+  } catch (error) {
+    databaseErrorResponse(res, error);
+  }
+});
+
+app.delete("/api/master/player-invitations/:id", requireMaster, async (req, res) => {
+  try {
+    await queryWithRetry("DELETE FROM player_invitations WHERE token_hash = $1", [req.params.id]);
+    res.json({ ok: true });
+  } catch (error) {
+    databaseErrorResponse(res, error);
+  }
+});
+
+app.patch("/api/master/player-accounts/:id", requireMaster, async (req, res) => {
+  try {
+    await queryWithRetry(
+      "UPDATE player_accounts SET enabled = $1, updated_at = NOW() WHERE id = $2",
+      [req.body?.enabled === true, req.params.id]
+    );
+    res.json({ ok: true });
+  } catch (error) {
+    databaseErrorResponse(res, error);
+  }
+});
+
 const imageExtensions = { "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif" };
 function hasValidImageSignature(buffer, mimeType) {
   if (mimeType === "image/jpeg") return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
@@ -661,6 +714,75 @@ app.post("/api/player/login", loginRateLimit, async (req, res) => {
     res.json({ ok: true });
   } catch (error) {
     databaseErrorResponse(res, error);
+  }
+});
+
+app.post("/api/player/register", loginRateLimit, async (req, res) => {
+  const token = String(req.body?.token || "");
+  const username = String(req.body?.username || "").trim().toLowerCase();
+  const password = String(req.body?.password || "");
+  const requestedName = String(req.body?.displayName || "").trim().slice(0, 120);
+  if (!/^[a-z0-9_.-]{3,40}$/i.test(username)) {
+    return res.status(400).json({ error: "Логин: 3–40 латинских символов, цифр, точек, дефисов или подчёркиваний" });
+  }
+  if (password.length < 6) return res.status(400).json({ error: "Пароль должен содержать минимум 6 символов" });
+  let client;
+  try {
+    client = await connectWithRetry();
+    await client.query("BEGIN");
+    const inviteResult = await client.query(
+      "SELECT * FROM player_invitations WHERE token_hash = $1 AND expires_at > NOW() FOR UPDATE",
+      [hashToken(token)]
+    );
+    const invitation = inviteResult.rows[0];
+    if (!invitation) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Приглашение недействительно или уже использовано" });
+    }
+    const stateResult = await client.query("SELECT data FROM campaign_state WHERE id = 1 FOR UPDATE");
+    const state = stateResult.rows[0]?.data;
+    if (!state) throw new Error("Campaign state is not initialized");
+    const displayName = requestedName || invitation.display_name || username;
+    const characterId = crypto.randomUUID();
+    await client.query("INSERT INTO campaign_backups (data) SELECT data FROM campaign_state WHERE id = 1");
+    const character = {
+      id: characterId, kind: "player", name: "Новый персонаж", player: displayName,
+      packId: state.packs?.[0]?.id || "", group: state.packs?.[0]?.name || "",
+      className: "", race: "", background: "", alignment: "", level: 1, xp: 0,
+      hp: 10, maxHp: 10, tempHp: 0, ac: 10, speed: 30, gold: 0,
+      hitDieType: 8, hitDiceTotal: 1, usedHitDice: 0,
+      abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      saveProficiencies: [], skillProficiencies: [], skillExpertise: [],
+      spellAbility: "int", spellSlots: Array.from({ length: 9 }, (_, index) => ({ level: index + 1, max: 0, used: 0 })),
+      spells: [], featureCards: [], attackCards: [], traitCards: {}, personalInventory: [],
+      playerAccessEnabled: true
+    };
+    state.characters ||= [];
+    state.characters.push(character);
+    const credentials = await hashPassword(password);
+    const accountResult = await client.query(
+      `INSERT INTO player_accounts (username, password_hash, password_salt, character_id, display_name, enabled)
+       VALUES ($1, $2, $3, $4, $5, TRUE) RETURNING id`,
+      [username, credentials.hash, credentials.salt, characterId, displayName]
+    );
+    await client.query("UPDATE campaign_state SET data = $1, updated_at = NOW() WHERE id = 1", [state]);
+    await client.query("DELETE FROM player_invitations WHERE token_hash = $1", [hashToken(token)]);
+    const sessionToken = crypto.randomBytes(32).toString("base64url");
+    await client.query(
+      "INSERT INTO player_sessions (token_hash, player_id, expires_at) VALUES ($1, $2, $3)",
+      [hashToken(sessionToken), accountResult.rows[0].id, new Date(Date.now() + sessionLifetime)]
+    );
+    await client.query("COMMIT");
+    clearLoginAttempts(req);
+    broadcastStateChanged();
+    res.setHeader("Set-Cookie", sessionCookie(req, "dnd_player_session", sessionToken, Math.floor(sessionLifetime / 1000)));
+    res.json({ ok: true });
+  } catch (error) {
+    try { if (client) await client.query("ROLLBACK"); } catch {}
+    if (error.code === "23505") return res.status(409).json({ error: "Этот логин уже занят" });
+    databaseErrorResponse(res, error);
+  } finally {
+    if (client) client.release();
   }
 });
 

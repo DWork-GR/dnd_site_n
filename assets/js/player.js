@@ -285,6 +285,30 @@ $("#login-form").onsubmit = async event => {
     render(await api("/api/player/data"));
   } catch (error) { $("#login-error").textContent = error.message; }
 };
+const inviteToken = new URLSearchParams(location.search).get("invite");
+if (inviteToken) {
+  $("#login-form").classList.add("hidden");
+  $("#register-form").classList.remove("hidden");
+  $("#show-login").classList.remove("hidden");
+  $("#login-view h1").textContent = "Регистрация игрока";
+  $("#login-view p").textContent = "Придумайте логин и пароль. После регистрации вы сможете самостоятельно заполнить свой лист персонажа.";
+}
+$("#show-login").onclick = () => {
+  $("#register-form").classList.add("hidden");
+  $("#show-login").classList.add("hidden");
+  $("#login-form").classList.remove("hidden");
+  $("#login-view h1").textContent = "Вход игрока";
+};
+$("#register-form").onsubmit = async event => {
+  event.preventDefault();
+  $("#login-error").textContent = "";
+  try {
+    const body = { ...Object.fromEntries(new FormData(event.currentTarget)), token: inviteToken };
+    await api("/api/player/register", { method: "POST", body: JSON.stringify(body) });
+    history.replaceState({}, "", location.pathname);
+    render(await api("/api/player/data"));
+  } catch (error) { $("#login-error").textContent = error.message; }
+};
 $("#logout").onclick = async () => { await api("/api/player/logout", { method: "POST" }); location.reload(); };
 $("#save-character").onclick = saveCharacter;
 $("#save-notes").onclick = async () => {

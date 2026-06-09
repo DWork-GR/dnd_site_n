@@ -37,6 +37,22 @@ Object.assign(DndApp, {
     this.$("#character-filters").innerHTML = `<button class="filter ${group === "all" ? "active" : ""}" data-group="all">Все герои</button>` + packs.map(pack => `<button class="filter ${group === pack.name ? "active" : ""}" data-group="${this.escapeHtml(pack.name)}">${this.escapeHtml(pack.name)}</button>`).join("");
     const list = this.data.characters.filter(c => c.kind === "player" && (group === "all" || this.data.packs.find(p => p.id === c.packId)?.name === group));
     this.$("#character-grid").innerHTML = list.map(c => this.characterCard(c)).join("") || "<p>В этой группе пока нет героев.</p>";
+    this.renderPlayerRoster();
+  },
+
+  async renderPlayerRoster() {
+    try {
+      const [accountsResponse, invitationsResponse] = await Promise.all([
+        fetch("/api/master/player-accounts"), fetch("/api/master/player-invitations")
+      ]);
+      const accounts = await accountsResponse.json();
+      const invitations = await invitationsResponse.json();
+      this.$("#player-account-roster").innerHTML = `<strong>Зарегистрированные игроки · ${accounts.length}</strong>` + accounts.map(account => {
+        const character = this.data.characters.find(item => item.id === account.character_id);
+        return `<div class="player-account-row"><span><b>${this.escapeHtml(account.display_name || account.username)}</b><small>@${this.escapeHtml(account.username)}</small></span><span>${this.escapeHtml(character?.name || "Лист не найден")}</span><button data-toggle-player="${account.id}" data-enabled="${account.enabled}">${account.enabled ? "Отключить вход" : "Включить вход"}</button></div>`;
+      }).join("");
+      this.$("#player-invitation-list").innerHTML = `<strong>Ожидают регистрации · ${invitations.length}</strong>` + invitations.map(invite => `<div class="player-account-row"><span><b>${this.escapeHtml(invite.display_name || "Без имени")}</b><small>ссылка действует до ${new Date(invite.expires_at).toLocaleDateString("ru")}</small></span><span>Ещё не зарегистрирован</span><button data-delete-invite="${invite.id}">Отозвать</button></div>`).join("");
+    } catch {}
   },
 
   renderLore(type = "all") {
