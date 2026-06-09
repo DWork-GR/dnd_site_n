@@ -11,7 +11,8 @@
     const modal=e.target.closest("[data-modal]"); if(modal) A.openModal(modal.dataset.modal);
     const sheet=e.target.closest("[data-open-sheet]"); if(sheet) A.openCharacterSheet(+sheet.dataset.openSheet);
     const npc=e.target.closest("[data-open-npc]"); if(npc) A.openNpcDossier(+npc.dataset.openNpc);
-    const lore=e.target.closest("[data-open-lore]"); if(lore) A.openLoreSheet(+lore.dataset.openLore);
+    const editLore=e.target.closest("[data-edit-lore]"); if(editLore){e.preventDefault();e.stopPropagation();$("#lore-view-dialog").close();A.openLoreSheet(+editLore.dataset.editLore);}
+    const viewLore=e.target.closest("[data-view-lore]"); if(viewLore&&!editLore) A.openLoreView(+viewLore.dataset.viewLore);
     const openSession=e.target.closest("[data-open-session]"); if(openSession) { e.stopPropagation(); A.openSessionEditor(openSession.dataset.openSession); }
     const sessionDate=e.target.closest("[data-session-date]"); if(sessionDate && !openSession) A.openSessionEditor(null, sessionDate.dataset.sessionDate);
     const note=e.target.closest("[data-note-id]"); if(note){A.selectedNoteId=note.dataset.noteId;A.renderWorkshop();}

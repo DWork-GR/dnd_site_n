@@ -29,12 +29,21 @@ Object.assign(DndApp, {
     this.$("#lore-dialog").showModal();
   },
 
+  openLoreView(index) {
+    const entry = this.data.lore[index];
+    if (!entry) return;
+    const audience = entry.visibleToPlayers ? "Видно всем игрокам" : entry.visibleToCharacterIds?.length ? `Видно выбранным игрокам: ${entry.visibleToCharacterIds.length}` : "Видно только мастеру";
+    const images = (entry.images || []).map(image => `<button type="button" class="lore-view-image" data-open-image="${this.escapeHtml(image.url)}" title="Открыть изображение в полном размере"><img src="${this.escapeHtml(image.url)}" alt="${this.escapeHtml(image.title || entry.title)}"><span>${this.escapeHtml(image.title || "Открыть полностью")}</span></button>`).join("");
+    this.$("#lore-view-content").innerHTML = `<header class="lore-view-head"><div><span class="eyebrow">${this.escapeHtml(entry.type)}</span><h2>${this.escapeHtml(entry.title)}</h2><small>${audience}</small></div><div class="lore-view-actions"><button type="button" class="ghost-button" data-edit-lore="${index}">✎ Редактировать</button><button type="button" class="modal-close" data-close-dialog="lore-view-dialog">×</button></div></header>${images ? `<section class="lore-view-gallery">${images}</section>` : ""}${entry.type === "Фракция" && entry.ideology ? `<section class="lore-view-ideology"><strong>Идеология</strong><div>${window.RichText.render(entry.ideology, this.escapeHtml)}</div></section>` : ""}<section class="lore-view-text">${window.RichText.render(entry.text, this.escapeHtml)}</section>`;
+    this.$("#lore-view-dialog").showModal();
+  },
+
   updateLoreFields() {
     this.$("#lore-ideology").classList.toggle("visible", this.$("#lore-form").elements.type.value === "Фракция");
   },
 
   renderLoreImages() {
-    this.$("#lore-image-list").innerHTML = this.editingLoreImages.map((image, index) => `<article><img src="${this.escapeHtml(image.url)}" alt="${this.escapeHtml(image.title || "")}"><span>${this.escapeHtml(image.title || "Изображение")}</span><button type="button" class="delete" data-remove-lore-image="${index}">×</button></article>`).join("") || "<small>У этой записи пока нет изображений.</small>";
+    this.$("#lore-image-list").innerHTML = this.editingLoreImages.map((image, index) => `<article><button type="button" class="lore-editor-image" data-open-image="${this.escapeHtml(image.url)}" title="Открыть полностью"><img src="${this.escapeHtml(image.url)}" alt="${this.escapeHtml(image.title || "")}"></button><span>${this.escapeHtml(image.title || "Изображение")}</span><button type="button" class="delete" data-remove-lore-image="${index}">×</button></article>`).join("") || "<small>У этой записи пока нет изображений.</small>";
   },
 
   openSessionEditor(id = null, suggestedDate = "") {

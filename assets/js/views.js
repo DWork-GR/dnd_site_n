@@ -88,7 +88,7 @@ Object.assign(DndApp, {
       const index = this.data.lore.indexOf(entry);
       const audience = entry.visibleToPlayers ? "Всем игрокам" : entry.visibleToCharacterIds?.length ? `${entry.visibleToCharacterIds.length} игрокам` : "Только мастеру";
       const cover = entry.images?.[0]?.url ? `<img class="lore-card-image" src="${this.escapeHtml(entry.images[0].url)}" alt="">` : "";
-      return `<article class="lore-card openable" data-open-lore="${index}">${cover}<header><span class="tag">${this.escapeHtml(entry.type)}</span><span class="lore-open">Открыть →</span></header><h3>${this.escapeHtml(entry.title)}</h3>${entry.type === "Фракция" && entry.ideology ? `<strong class="lore-ideology-preview">${window.RichText.render(entry.ideology, this.escapeHtml)}</strong>` : ""}<p>${window.RichText.render(entry.text, this.escapeHtml)}</p><small class="lore-audience">${audience}</small></article>`;
+      return `<article class="lore-card openable" data-view-lore="${index}"><button type="button" class="lore-card-edit" data-edit-lore="${index}" aria-label="Редактировать запись" title="Редактировать">✎</button>${cover}<header><span class="tag">${this.escapeHtml(entry.type)}</span><span class="lore-open">Открыть карточку →</span></header><h3>${this.escapeHtml(entry.title)}</h3>${entry.type === "Фракция" && entry.ideology ? `<strong class="lore-ideology-preview">${window.RichText.render(entry.ideology, this.escapeHtml)}</strong>` : ""}<div class="lore-card-excerpt">${window.RichText.render(entry.text, this.escapeHtml)}</div><small class="lore-audience">${audience}</small></article>`;
     }).join("") || `<div class="empty-state"><strong>Записей пока нет</strong><span>Создайте первое место, фракцию или легенду.</span></div>`;
   },
 

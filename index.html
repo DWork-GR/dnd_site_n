@@ -436,6 +436,10 @@
     </form>
   </dialog>
 
+  <dialog id="lore-view-dialog" class="lore-view-dialog">
+    <article id="lore-view-content"></article>
+  </dialog>
+
   <dialog id="lore-dialog" class="lore-dialog">
     <form method="dialog" id="lore-form">
       <div class="lore-sheet-head">
@@ -455,6 +459,7 @@
       <label class="lore-description">Подробное описание<textarea name="text" required placeholder="Всё, что важно знать об этой записи..."></textarea></label>
       <section class="lore-images-editor">
         <div><strong>Изображения записи</strong><button type="button" class="ghost-button" id="upload-lore-image">＋ Добавить изображение</button><input id="lore-image-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden></div>
+        <small class="lore-image-hint">Лучше всего подходит горизонтальное изображение 16:9, от 1200 × 675 px. Поддерживаются JPG, PNG, WebP и GIF.</small>
         <div id="lore-image-list"></div>
       </section>
       <div class="modal-actions"><button type="button" class="delete" id="delete-lore-sheet">Удалить</button><button type="button" class="ghost-button" data-close-dialog="lore-dialog">Отмена</button><button value="default" class="primary-button">Сохранить запись</button></div>
