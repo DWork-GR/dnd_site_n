@@ -1,0 +1,18 @@
+{
+  "name": "dnd-master-archive",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "setup:db": "powershell -NoProfile -ExecutionPolicy Bypass -File setup-db.ps1",
+    "start": "node server/watchdog.js",
+    "start:once": "node server/index.js",
+    "publish": "powershell -NoProfile -ExecutionPolicy Bypass -File publish-site.ps1",
+    "publish:localhost": "powershell -NoProfile -ExecutionPolicy Bypass -File publish-localhost.ps1",
+    "check": "node --check server/index.js && node --check server/watchdog.js && node --check assets/js/rich-text.js && node --check assets/js/core.js && node --check assets/js/views.js && node --check assets/js/sheets.js && node --check assets/js/events.js && node --check assets/js/main.js && node --check assets/js/player.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "pg": "^8.16.0"
+  }
+}

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кабинет игрока</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/character-sheet.css">
+  <link rel="stylesheet" href="assets/css/spellbook.css">
+  <link rel="stylesheet" href="assets/css/player.css">
+</head>
+<body>
+  <main class="player-shell">
+    <section class="login-card" id="login-view">
+      <span class="eyebrow">Архив кампании</span>
+      <h1>Вход игрока</h1>
+      <p>Здесь находится только твой персонаж и знания, которыми с тобой поделился мастер.</p>
+      <form id="login-form">
+        <label>Логин<input name="username" autocomplete="username" required></label>
+        <label>Пароль<input name="password" type="password" autocomplete="current-password" required></label>
+        <button>Открыть свой лист</button>
+      </form>
+      <small class="error" id="login-error"></small>
+    </section>
+
+    <section class="player-app hidden" id="player-app">
+      <aside class="combat-dock hidden" id="combat-dock">
+        <header><div><span id="combat-round">Бой</span><strong id="combat-turn-title">Ожидание хода</strong></div><button class="combat-collapse" id="combat-collapse" type="button">−</button></header>
+        <div class="combat-dock-body">
+          <div class="combat-order" id="combat-order"></div>
+          <div class="player-death-saves hidden" id="player-death-saves">
+            <strong>Спасброски от смерти</strong>
+            <p>Брось d20 отдельно, затем отметь результат.</p>
+            <div><button type="button" data-death-save="success">Успех</button><button type="button" class="danger" data-death-save="failure">Провал</button></div>
+          </div>
+          <button type="button" class="end-player-turn hidden" id="end-player-turn">Ход сделан</button>
+        </div>
+      </aside>
+      <header class="player-header">
+        <div class="character-emblem"><span>D20</span><img id="player-portrait" alt="Портрет персонажа"></div>
+        <div class="player-heading"><span class="eyebrow">Личный архив героя</span><h1 id="character-title">Персонаж</h1><small id="sync-status">Синхронизировано</small></div>
+        <div class="header-actions"><button id="save-character">Сохранить изменения</button><button class="quiet" id="logout">Выйти</button></div>
+      </header>
+
+      <nav class="tabs">
+        <button class="active" data-tab="sheet">Лист</button>
+        <button data-tab="spells">Гримуар</button>
+        <button data-tab="inventory">Инвентарь</button>
+        <button data-tab="notes">Дневник</button>
+        <button data-tab="lore">Известный мир</button>
+        <button data-tab="shops">Магазины</button>
+      </nav>
+
+      <form class="tab-page active player-official-sheet" id="sheet-page">
+        <div class="official-sheet" id="sheet-tab-main">
+          <div class="sheet-identity">
+            <label class="character-name">Имя персонажа<input name="name" required></label>
+            <div class="identity-fields">
+              <label>Класс и уровень<div class="joined-inputs"><input name="className"><input name="level" type="number" min="1" max="20"></div></label>
+              <label>Предыстория<input name="background"></label>
+              <label>Раса<input name="race"></label>
+              <label>Мировоззрение<input name="alignment"></label>
+              <label>Опыт<input name="xp" type="number" min="0"></label>
+            </div>
+          </div>
+          <div class="sheet-columns">
+            <div class="sheet-column left-column">
+              <div class="ability-grid" id="abilities"></div>
+              <div class="boxed-block saves-block"><h4>Спасброски</h4><div id="player-saves" class="official-check-list"></div></div>
+              <div class="boxed-block skills-block"><h4>Навыки</h4><div id="player-skills" class="official-check-list"></div></div>
+              <div class="passive-box"><strong id="player-passive">10</strong><span>Пассивная внимательность</span></div>
+              <label class="lined-box">Прочие владения и языки<textarea name="proficiencies"></textarea></label>
+            </div>
+            <div class="sheet-column center-column">
+              <div class="quick-stats">
+                <label class="shield-stat">Класс Доспеха<input name="ac" type="number"></label>
+                <div class="outlined-stat"><strong id="player-initiative">+0</strong><span>Инициатива</span></div>
+                <label class="outlined-stat">Скорость<input name="speed" type="number"></label>
+              </div>
+              <div class="inspiration-row">
+                <label><input name="inspiration" type="checkbox"> Вдохновение</label>
+                <div><strong id="player-prof">+2</strong><span>Бонус мастерства</span></div>
+              </div>
+              <div class="hp-block">
+                <label>Максимум хитов<input name="maxHp" type="number" disabled></label>
+                <label class="big-hp">Текущие хиты<input name="hp" type="number" disabled></label>
+                <label class="big-hp">Временные хиты<input name="tempHp" type="number" disabled></label>
+              </div>
+              <div class="rest-grid">
+                <div class="healing-box">
+                  <strong>Лечение костями хитов</strong><span id="hit-dice-status">0 из 0 доступно</span>
+                  <button type="button" id="heal-with-hit-die">Бросить кость и лечиться</button><small id="healing-result"></small>
+                </div>
+                <fieldset class="death-saves"><legend>Спасброски от смерти</legend><label>Успехи<input name="deathSuccesses" type="number" min="0" max="3" disabled></label><label>Провалы<input name="deathFailures" type="number" min="0" max="3" disabled></label></fieldset>
+              </div>
+              <section class="feature-editor attacks-box"><div class="feature-editor-head"><strong>Атаки и оружие</strong><button type="button" id="add-player-attack">＋ Оружие</button></div><div id="player-attack-cards"></div></section>
+              <div class="coins-row"><label>ММ<input name="cp" type="number"></label><label>СМ<input name="sp" type="number"></label><label>ЭМ<input name="ep" type="number"></label><label>ЗМ<input name="gold" type="number"></label><label>ПМ<input name="pp" type="number"></label></div>
+              <label class="lined-box equipment-box">Снаряжение<textarea name="equipment"></textarea></label>
+            </div>
+            <div class="sheet-column right-column">
+              <section class="feature-editor personality-box"><div class="feature-editor-head"><strong>Черты характера</strong><button type="button" data-add-player-trait="personality">＋ Черта</button></div><div data-player-trait-cards="personality"></div></section>
+              <section class="feature-editor personality-box"><div class="feature-editor-head"><strong>Идеалы</strong><button type="button" data-add-player-trait="ideals">＋ Идеал</button></div><div data-player-trait-cards="ideals"></div></section>
+              <section class="feature-editor personality-box"><div class="feature-editor-head"><strong>Привязанности</strong><button type="button" data-add-player-trait="bonds">＋ Привязанность</button></div><div data-player-trait-cards="bonds"></div></section>
+              <section class="feature-editor personality-box"><div class="feature-editor-head"><strong>Слабости</strong><button type="button" data-add-player-trait="flaws">＋ Слабость</button></div><div data-player-trait-cards="flaws"></div></section>
+              <section class="feature-editor features-box"><div class="feature-editor-head"><strong>Умения и особенности</strong><button type="button" id="add-player-feature">＋ Способность</button></div><div id="player-feature-cards"></div></section>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <section class="tab-page player-spellbook" id="spells-page">
+        <div class="spellbook" id="sheet-tab-spells">
+          <div class="grimoire-cover"><div class="grimoire-rune">✦</div><div><span>Личный гримуар</span><strong>Книга заклинаний</strong></div><div class="grimoire-rune">✦</div></div>
+          <div class="grimoire-spread">
+          <section class="grimoire-page grimoire-left">
+            <div class="page-ornament">❮ ✦ ❯</div>
+            <div class="spellbook-heading">
+              <label>Класс заклинателя<input id="spell-class"></label>
+              <label>Базовая характеристика<select id="spell-ability"><option value="int">Интеллект</option><option value="wis">Мудрость</option><option value="cha">Харизма</option></select></label>
+              <div class="spell-auto-stat"><span>Сл спасброска</span><strong id="player-spell-save-dc">10</strong></div>
+              <div class="spell-auto-stat"><span>Бонус атаки</span><strong id="player-spell-attack">+2</strong></div>
+            </div>
+            <div class="page-title"><i></i><span>Ячейки заклинаний</span><i></i></div>
+            <div class="spell-slots" id="player-spell-slots"></div>
+            <label class="spell-notes">Заметки о магии, компоненты и фокусы<textarea id="spell-notes"></textarea></label>
+            <div class="arcane-circle"><span>✧</span><i></i><b></b></div>
+          </section>
+          <section class="grimoire-page grimoire-right">
+            <div class="page-ornament">❮ ✦ ❯</div>
+            <div class="spell-toolbar"><div><span>Записи арканиста</span><h3>Заклинания</h3></div><button id="add-player-spell">＋ Новое</button></div>
+            <div id="player-spells" class="spell-list"></div>
+          </section>
+        </div>
+        </div>
+      </section>
+
+      <section class="tab-page player-inventory-page" id="inventory-page">
+        <div class="section-title"><div><span class="eyebrow">Снаряжение героя</span><h2>Личный инвентарь</h2></div><button id="add-inventory-item">＋ Добавить предмет</button></div>
+        <p class="page-intro">Оружие, припасы, магические артефакты и всё, что важно не потерять между сессиями.</p>
+        <div id="player-inventory" class="player-inventory"></div>
+      </section>
+
+      <section class="tab-page notes-book" id="notes-page">
+        <div class="section-title"><div><span class="eyebrow">Видно только тебе</span><h2>Дневник персонажа</h2></div><button id="save-notes">Сохранить дневник</button></div>
+        <div class="journal-grid">
+          <label>Что я знаю<textarea id="journal-knowledge" placeholder="Факты, тайны, слухи, известные места и люди..."></textarea></label>
+          <label>Что я помню<textarea id="journal-memories" placeholder="Важные события, обещания и личные воспоминания..."></textarea></label>
+          <label>Мои цели<textarea id="journal-goals" placeholder="Планы, мечты, клятвы и незавершённые дела..."></textarea></label>
+          <label>Свободные записи<textarea id="personal-notes" placeholder="Догадки, планы, долги, подозрительные NPC..."></textarea></label>
+        </div>
+      </section>
+
+      <section class="tab-page archive-page lore-page" id="lore-page">
+        <div class="section-title"><div><span class="eyebrow">Опубликовано мастером</span><h2>Известный мир</h2></div></div>
+        <p class="page-intro">Места, люди, фракции и тайны, которые уже известны твоему персонажу.</p>
+        <div id="public-lore" class="lore-grid"></div>
+      </section>
+      <section class="tab-page archive-page shops-page" id="shops-page">
+        <div class="section-title"><div><span class="eyebrow">Доступные торговцы</span><h2>Магазины</h2></div></div>
+        <p class="page-intro">Торговцы и товары, которые мастер открыл для твоего персонажа.</p>
+        <div id="player-shops" class="player-shops"></div>
+      </section>
+    </section>
+  </main>
+  <script src="assets/js/rich-text.js"></script>
+  <script src="assets/js/player.js"></script>
+</body>
+</html>

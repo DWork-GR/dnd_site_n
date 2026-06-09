@@ -1,0 +1,18 @@
+﻿.lore-ideology-preview { display: -webkit-box; margin-bottom: 8px; overflow: hidden; color: #d0b473; font-size: 10px; font-weight: 600; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.lore-card p { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 4; }
+.lore-dialog { width: min(920px, calc(100% - 24px)); max-height: 94vh; padding: 0; overflow: hidden auto; color: #231b15; border: 2px solid #7b352c; border-radius: 12px; background: #f5eee2; box-shadow: 0 30px 100px #000d; }
+.lore-dialog::backdrop { background: #080706dc; backdrop-filter: blur(3px); }
+.lore-dialog form { padding: 0 28px 24px; }
+.lore-sheet-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 0 -28px 22px; padding: 21px 28px 18px; color: #fff8ec; border-bottom: 4px double #bb866e; background: linear-gradient(110deg, #3b211b, #71352c); }
+.lore-sheet-head h2 { margin-top: 5px; color: #fffaf0; font-size: 27px; line-height: 1.25; overflow-wrap: anywhere; }
+.lore-sheet-head .modal-close { color: #f1d4b0; }
+.lore-sheet-meta { display: grid; grid-template-columns: minmax(180px, .7fr) minmax(0, 2fr); gap: 14px; }
+.lore-dialog label { display: grid; color: #5f2e27; font-size: 10px; font-weight: 800; line-height: 1.4; letter-spacing: .05em; text-transform: uppercase; }
+.lore-dialog input, .lore-dialog select, .lore-dialog textarea { margin-top: 6px; padding: 11px; color: #211913; border: 1px solid #c6b49b; border-radius: 7px; background: #fffdf8; font-size: 13px; font-weight: 500; line-height: 1.7; }
+.lore-dialog input:focus, .lore-dialog select:focus, .lore-dialog textarea:focus { outline: 2px solid #9c493c; outline-offset: 1px; border-color: #9c493c; }
+.lore-ideology { display: none !important; margin-top: 16px; padding: 15px; border-left: 5px solid #8a3e33; border-radius: 7px; background: #ead8c5; }
+.lore-ideology.visible { display: grid !important; }
+.lore-ideology textarea { min-height: 160px; }
+.lore-description { margin-top: 16px; }
+.lore-description textarea { min-height: 460px; resize: vertical; background-color: #fffdf8; background-image: repeating-linear-gradient(transparent 0 28px, #89745a1c 29px); }
+.lore-dialog .modal-actions { position: sticky; bottom: 0; margin: 18px -28px -24px; padding: 14px 28px; border-top: 1px solid #cfbea6; background: #f5eee2ee; backdrop-filter: blur(5px); }

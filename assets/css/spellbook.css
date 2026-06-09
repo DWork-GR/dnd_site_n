@@ -1,0 +1,41 @@
+﻿/* Readable grimoire */
+#sheet-tab-spells .grimoire-cover { padding: 14px 20px; color: #ffe7ae; background: linear-gradient(100deg, #48231c, #79392d 48%, #48231c); }
+#sheet-tab-spells .grimoire-cover span { font-size: 9px; letter-spacing: .16em; }
+#sheet-tab-spells .grimoire-cover strong { font-size: 19px; }
+#sheet-tab-spells .grimoire-rune { opacity: .8; }
+#sheet-tab-spells .grimoire-page { padding: 25px 27px 32px; color: #211710; background-color: #f1e2bd; background-image: radial-gradient(circle at 15% 8%, #fff9e9cc, transparent 30%), radial-gradient(circle at 82% 90%, #9c663d12, transparent 38%); }
+#sheet-tab-spells .grimoire-page:before { opacity: .45; border-radius: 10px; }
+#sheet-tab-spells .grimoire-spread:after { opacity: .6; }
+#sheet-tab-spells .page-ornament { margin-bottom: 17px; opacity: .55; font-size: 14px; }
+#sheet-tab-spells .page-title { margin: 20px 0 12px; color: #612b24; font-size: 11px; letter-spacing: .08em; }
+#sheet-tab-spells label { color: #33251c; font-size: 9px; line-height: 1.35; letter-spacing: .025em; }
+#sheet-tab-spells input, #sheet-tab-spells textarea, #sheet-tab-spells select { min-height: 35px; padding: 8px; color: #18110d; border: 1px solid #b89e78; border-radius: 6px; background: #fffaf0; font-size: 12px; font-weight: 600; }
+#sheet-tab-spells textarea { line-height: 1.6; }
+#sheet-tab-spells input:focus, #sheet-tab-spells textarea:focus, #sheet-tab-spells select:focus { outline: 2px solid #8e3d31; outline-offset: 1px; background: #fff; }
+#sheet-tab-spells .spellbook-heading { gap: 10px; }
+#sheet-tab-spells .spellbook-heading>label { padding: 10px; border: 1px solid #c5ae89; border-radius: 8px; background: #fff8e9; }
+#sheet-tab-spells .spell-auto-stat { min-height: 82px; border: 1px solid #a65a4b; border-top: 4px solid #743129; border-radius: 8px; background: #fff8e9; box-shadow: 0 2px 7px #4a2d1812; }
+#sheet-tab-spells .spell-auto-stat span { color: #623229; font-size: 9px; }
+#sheet-tab-spells .spell-auto-stat strong { color: #6f2d25; font-size: 29px; }
+#sheet-tab-spells .spell-slots { gap: 9px; }
+#sheet-tab-spells .slot-card { padding: 10px; border: 1px solid #c0a67e; border-top: 4px solid #79362b; border-radius: 8px; background: #fff8e9; box-shadow: 0 2px 6px #4a2d1812; }
+#sheet-tab-spells .slot-card:before { display: none; }
+#sheet-tab-spells .slot-card strong { font-size: 23px; }
+#sheet-tab-spells .slot-card span { color: #5b4939; font-size: 8px; }
+#sheet-tab-spells .slot-card label { font-size: 7px; }
+#sheet-tab-spells .slot-card input { min-height: 29px; background: #fff; font-size: 11px; }
+#sheet-tab-spells .spell-notes { padding: 12px; border: 1px solid #b78e68; border-left: 5px solid #79362b; border-radius: 8px; background: #fff8e9; }
+#sheet-tab-spells .spell-notes textarea { min-height: 170px; background-color: #fffdf8; background-image: repeating-linear-gradient(transparent 0 23px, #8d765522 24px); }
+#sheet-tab-spells .arcane-circle { opacity: .08; }
+#sheet-tab-spells .spell-toolbar { margin-bottom: 16px; padding: 3px 0 12px; border-bottom-color: #8c5b46; }
+#sheet-tab-spells .spell-toolbar span { color: #713129; font-size: 9px; letter-spacing: .11em; }
+#sheet-tab-spells .spell-toolbar h3 { color: #241812; font-size: 24px; }
+#sheet-tab-spells .spell-list { gap: 12px; padding: 2px 6px 2px 2px; scrollbar-width: thin; }
+#sheet-tab-spells .spell-card { padding: 14px; border: 1px solid #bca47f; border-left: 5px solid #79362b; border-radius: 8px; background: #fffaf0; box-shadow: 0 3px 8px #4a2d1818; }
+#sheet-tab-spells .spell-card:before { display: none; }
+#sheet-tab-spells .spell-card-top { gap: 9px; }
+#sheet-tab-spells .spell-card-top label, #sheet-tab-spells .spell-meta label, #sheet-tab-spells .spell-description { font-size: 8px; }
+#sheet-tab-spells .spell-name input { color: #632b24; font-size: 14px; font-weight: 800; }
+#sheet-tab-spells .spell-prepared, #sheet-tab-spells .spell-ritual, #sheet-tab-spells .spell-concentration { padding: 7px; border: 1px solid #d1c0a5; border-radius: 5px; background: #f6efe3; }
+#sheet-tab-spells .spell-description textarea { min-height: 115px; background-color: #fff; background-image: repeating-linear-gradient(transparent 0 23px, #8d765522 24px); }
+
