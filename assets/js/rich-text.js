@@ -2,7 +2,7 @@
   const tags = [
     ["b", "Ж", "Жирный"],
     ["i", "К", "Курсив"],
-    ["u", "Ч", "Подчёркнутый"]
+    ["u", "Ч", "Подчёркнутый"],
   ];
 
   function format(textarea, tag) {
@@ -17,7 +17,7 @@
   }
 
   function enhance(root = document) {
-    root.querySelectorAll("textarea").forEach(textarea => {
+    root.querySelectorAll("textarea").forEach((textarea) => {
       if (textarea.dataset.richTextReady) {
         textarea._richTextRefresh?.();
         return;
@@ -27,7 +27,12 @@
       toolbar.className = "rich-text-toolbar";
       const preview = document.createElement("div");
       preview.className = "rich-text-preview";
-      const escapeHtml = value => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+      const escapeHtml = (value) =>
+        String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
       const updatePreview = () => {
         preview.innerHTML = render(textarea.value, escapeHtml);
         preview.classList.toggle("empty", !textarea.value.trim());
@@ -61,8 +66,12 @@
   window.RichText = { enhance, render };
   document.addEventListener("DOMContentLoaded", () => {
     enhance();
-    new MutationObserver(mutations => mutations.forEach(mutation => mutation.addedNodes.forEach(node => {
-      if (node.nodeType === Node.ELEMENT_NODE) enhance(node);
-    }))).observe(document.body, { childList: true, subtree: true });
+    new MutationObserver((mutations) =>
+      mutations.forEach((mutation) =>
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) enhance(node);
+        }),
+      ),
+    ).observe(document.body, { childList: true, subtree: true });
   });
 })();

@@ -8,11 +8,16 @@
     "start:once": "node server/index.js",
     "publish": "powershell -NoProfile -ExecutionPolicy Bypass -File publish-site.ps1",
     "publish:localhost": "powershell -NoProfile -ExecutionPolicy Bypass -File publish-localhost.ps1",
-    "check": "node --check server/index.js && node --check server/watchdog.js && node --check assets/js/rich-text.js && node --check assets/js/core.js && node --check assets/js/views.js && node --check assets/js/sheets.js && node --check assets/js/events.js && node --check assets/js/main.js && node --check assets/js/player.js"
+    "check": "node --check server/index.js && node --check server/watchdog.js && node --check assets/js/rich-text.js && node --check assets/js/core.js && node --check assets/js/views.js && node --check assets/js/sheets.js && node --check assets/js/events.js && node --check assets/js/main.js && node --check assets/js/player.js",
+    "format": "prettier --write \"*.html\" \"*.css\" \"assets/**/*.{css,js}\" \"server/**/*.js\"",
+    "format:check": "prettier --check \"*.html\" \"*.css\" \"assets/**/*.{css,js}\" \"server/**/*.js\""
   },
   "dependencies": {
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.4"
   }
 }

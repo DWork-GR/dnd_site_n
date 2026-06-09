@@ -1,611 +1,1179 @@
 <!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#11100f">
-  <title>Хроники Пепельного Трона</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="grain"></div>
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-mark">D20</div>
-      <div>
-      <span class="eyebrow" id="brand-eyebrow">Личная летопись</span>
-      <strong id="brand-title">Архив мастера</strong>
-      </div>
-    </div>
-
-    <nav id="nav">
-      <button class="nav-link active" data-page="overview"><span>⌂</span> Обзор</button>
-      <button class="nav-link" data-page="heroes"><span>♙</span> Персонажи</button>
-      <button class="nav-link" data-page="world"><span>✦</span> Сеттинг</button>
-      <button class="nav-link" data-page="calendar"><span>▦</span> Календарь</button>
-      <button class="nav-link" data-page="media"><span>▧</span> Изображения</button>
-      <button class="nav-link" data-page="bestiary"><span>♞</span> Бестиарий</button>
-      <button class="nav-link" data-page="shops"><span>¤</span> Магазины</button>
-      <button class="nav-link" data-page="tools"><span>⚄</span> Расчёты</button>
-      <button class="nav-link" data-page="workshop"><span>✎</span> Мастерская</button>
-    </nav>
-
-    <div class="campaign-card">
-      <span class="eyebrow">Текущая кампания</span>
-      <strong id="sidebar-campaign-name">Пепельный Трон</strong>
-      <div class="progress"><i></i></div>
-      <small id="sidebar-campaign-meta">12 сессий · Глава III</small>
-    </div>
-
-    <button class="profile" id="master-profile">
-      <span class="avatar">DM</span>
-      <span><strong>Хранитель мира</strong><small>Dungeon Master</small></span>
-      <b>•••</b>
-    </button>
-  </aside>
-
-  <main>
-    <header class="topbar">
-      <button class="mobile-menu" id="mobile-menu">☰</button>
-      <div>
-        <span class="eyebrow" id="topbar-caption">Кампания</span>
-        <h1 id="page-title">Добрый вечер, Хранитель</h1>
-      </div>
-      <div class="top-actions">
-        <a class="ghost-button player-side-link" href="/player.html" target="_blank">Сторона игрока</a>
-        <label class="search"><span>⌕</span><input id="global-search" placeholder="Найти в хрониках..."></label>
-        <button class="icon-button" title="Уведомления" data-message="Новых уведомлений нет">♧<i></i></button>
-        <button class="primary-button" id="quick-add">＋ Новая запись</button>
-      </div>
-    </header>
-
-    <section class="page active" id="overview">
-      <div class="hero-banner">
-        <div class="hero-copy">
-          <span class="eyebrow" id="hero-kicker">Следующая игра · через 3 дня</span>
-          <h2 id="hero-title">Тени над Элдервейлом</h2>
-          <p id="hero-description">Герои добрались до ворот забытого города. За каменной аркой их уже ждёт то, чему не следовало просыпаться.</p>
-          <div class="hero-actions">
-            <button class="primary-button" data-goto="world">Открыть заметки</button>
-            <button class="ghost-button" id="session-button">Начать сессию</button>
-          </div>
-        </div>
-        <div class="moon"><span></span></div>
-        <div class="session-info">
-          <span>СЕССИЯ</span><strong id="hero-session-number">13</strong><small id="hero-session-name">«За вратами»</small>
-        </div>
-      </div>
-
-      <div class="section-heading">
-        <div><span class="eyebrow">Статус кампании</span><h3>Всё важное перед глазами</h3></div>
-        <button class="text-button" data-goto="heroes">Все персонажи →</button>
-      </div>
-      <div class="stats-grid">
-        <article class="stat-card"><span class="stat-icon amber">♟</span><div><small>Героев в пути</small><strong id="heroes-count">0</strong><em>в двух отрядах</em></div></article>
-        <article class="stat-card"><span class="stat-icon red">♥</span><div><small>Среднее здоровье</small><strong id="health-average">0%</strong><em>отряд готов к бою</em></div></article>
-        <article class="stat-card"><span class="stat-icon blue">◈</span><div><small>Сокровища</small><strong id="gold-total">0</strong><em>золотых монет</em></div></article>
-        <article class="stat-card"><span class="stat-icon violet">✦</span><div><small>Нити сюжета</small><strong>7</strong><em>3 требуют внимания</em></div></article>
-      </div>
-
-      <div class="dashboard-grid">
-        <article class="panel">
-          <div class="panel-head"><div><span class="eyebrow">Отряды</span><h3>Активные герои</h3></div><button class="round-button" data-goto="heroes">＋</button></div>
-          <div id="overview-party"></div>
-        </article>
-        <article class="panel">
-          <div class="panel-head"><div><span class="eyebrow">Подготовка</span><h3>До следующей сессии</h3></div><span class="counter" id="task-counter">0 / 0</span></div>
-          <div id="task-list" class="task-list"></div>
-          <form id="task-form" class="inline-form"><input id="task-input" placeholder="Добавить задачу..." required><button>＋</button></form>
-        </article>
-      </div>
-    </section>
-
-    <section class="page" id="heroes">
-      <div class="section-heading">
-        <div><span class="eyebrow">Группы и листы</span><h2>Персонажи игроков</h2></div>
-        <button class="primary-button" data-modal="character">＋ Добавить героя</button>
-      </div>
-      <div class="filter-row" id="character-filters">
-        <button class="filter active" data-group="all">Все герои</button>
-      </div>
-      <section class="player-roster-panel">
-        <div class="panel-head"><div><span class="eyebrow">Самостоятельный вход</span><h3>Игроки и приглашения</h3></div></div>
-        <form id="player-invite-form" class="player-invite-form">
-          <input id="player-invite-name" placeholder="Имя игрока (необязательно)">
-          <button class="primary-button">Создать ссылку-приглашение</button>
-        </form>
-        <small>Каждая ссылка одноразовая и действует 14 дней. Зарегистрировавшийся игрок получит собственный пустой лист.</small>
-        <div id="player-invite-result" class="player-invite-result hidden"></div>
-        <div id="player-account-roster" class="player-account-roster"></div>
-        <div id="player-invitation-list" class="player-account-roster"></div>
-      </section>
-      <div class="character-grid" id="character-grid"></div>
-    </section>
-
-    <section class="page" id="world">
-      <div class="section-heading">
-        <div><span class="eyebrow">Мир кампании</span><h2 id="world-heading">Атлас мира</h2></div>
-        <button class="primary-button" id="new-lore">＋ Новая запись</button>
-      </div>
-      <div class="world-layout">
-        <article class="map-card">
-          <div class="map-orbit orbit-one"></div><div class="map-orbit orbit-two"></div>
-          <span class="map-place place-a">Элдервейл<i></i></span>
-          <span class="map-place place-b">Северный предел<i></i></span>
-          <span class="map-place place-c">Пепельные земли<i></i></span>
-          <span class="map-place place-d">Сапфировый берег<i></i></span>
-          <div class="compass">✦</div>
-          <div class="map-caption"><span class="eyebrow">Известный мир</span><strong>Материк Эйра</strong></div>
-        </article>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#11100f" />
+    <title>Хроники Пепельного Трона</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="grain"></div>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">D20</div>
         <div>
-          <div class="filter-row lore-filters">
-            <button class="filter active" data-lore-filter="all">Все</button>
-            <button class="filter" data-lore-filter="Место">Места</button>
-            <button class="filter" data-lore-filter="Фракция">Фракции</button>
-            <button class="filter" data-lore-filter="Легенда">Легенды</button>
-          </div>
-          <div id="lore-list" class="lore-list"></div>
+          <span class="eyebrow" id="brand-eyebrow">Личная летопись</span>
+          <strong id="brand-title">Архив мастера</strong>
         </div>
       </div>
-    </section>
 
-    <section class="page" id="bestiary">
-      <div class="section-heading"><div><span class="eyebrow">Monster Manual кампании</span><h2>Бестиарий</h2></div><button class="primary-button" id="new-monster">＋ Добавить существо</button></div>
-      <div class="bestiary-filters panel">
-        <label>Тип<select id="monster-filter-type"><option value="all">Все типы</option></select></label>
-        <label>Опасность<select id="monster-filter-cr"><option value="all">Любая CR</option></select></label>
-        <label>Тег кампании<select id="monster-filter-tag"><option value="all">Все арки</option></select></label>
-      </div>
-      <div id="bestiary-grid" class="bestiary-grid"></div>
-    </section>
+      <nav id="nav">
+        <button class="nav-link active" data-page="overview"><span>⌂</span> Обзор</button>
+        <button class="nav-link" data-page="heroes"><span>♙</span> Персонажи</button>
+        <button class="nav-link" data-page="world"><span>✦</span> Сеттинг</button>
+        <button class="nav-link" data-page="calendar"><span>▦</span> Календарь</button>
+        <button class="nav-link" data-page="media"><span>▧</span> Изображения</button>
+        <button class="nav-link" data-page="bestiary"><span>♞</span> Бестиарий</button>
+        <button class="nav-link" data-page="shops"><span>¤</span> Магазины</button>
+        <button class="nav-link" data-page="tools"><span>⚄</span> Расчёты</button>
+        <button class="nav-link" data-page="workshop"><span>✎</span> Мастерская</button>
+      </nav>
 
-    <section class="page" id="shops">
-      <div class="section-heading"><div><span class="eyebrow">Торговцы и ассортимент</span><h2>Магазины</h2></div><button class="primary-button" id="new-shop">＋ Добавить торговца</button></div>
-      <div id="shop-list" class="shop-list"></div>
-    </section>
-
-    <section class="page" id="media">
-      <div class="section-heading">
-        <div><span class="eyebrow">Карты, портреты и улики</span><h2>Медиатека кампании</h2></div>
-        <button class="primary-button" id="upload-media-button">＋ Загрузить изображение</button>
-      </div>
-      <input id="upload-media-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
-      <div class="media-toolbar panel">
-        <label>Категория<select id="media-category"><option value="other">Прочее</option><option value="portrait">Портрет</option><option value="artifact">Артефакт</option><option value="note">Записка</option><option value="map">Карта</option></select></label>
-        <label>Название<input id="media-title" placeholder="Необязательно"></label>
-        <span>JPG, PNG, WebP или GIF · до 10 МБ</span>
-      </div>
-      <div id="media-gallery" class="media-gallery"></div>
-    </section>
-
-    <section class="page" id="calendar">
-      <div class="section-heading">
-        <div><span class="eyebrow">Планы и хроники</span><h2>Календарь сессий</h2></div>
-        <button class="primary-button" id="new-session">＋ Запланировать сессию</button>
-      </div>
-      <div class="calendar-toolbar panel">
-        <button class="ghost-button" id="calendar-prev">←</button>
-        <div><span class="eyebrow">Игровой месяц</span><h3 id="calendar-month"></h3></div>
-        <button class="ghost-button" id="calendar-today">Сегодня</button>
-        <button class="ghost-button" id="calendar-next">→</button>
-      </div>
-      <div class="calendar-layout">
-        <article class="panel calendar-panel">
-          <div class="calendar-weekdays"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
-          <div class="calendar-grid" id="calendar-grid"></div>
-        </article>
-        <aside class="panel session-journal">
-          <div class="panel-head"><div><span class="eyebrow">Хроника кампании</span><h3>Сессии и журналы</h3></div></div>
-          <div id="session-list" class="session-list"></div>
-        </aside>
-      </div>
-    </section>
-
-    <section class="page" id="tools">
-      <div class="section-heading">
-        <div><span class="eyebrow">Помощник мастера</span><h2>Броски и расчёты</h2></div>
-      </div>
-      <div class="tools-grid">
-        <article class="panel dice-panel">
-          <span class="eyebrow">Быстрый бросок</span><h3>Кости судьбы</h3>
-          <div class="dice-result" id="dice-result"><small>Результат</small><strong>20</strong><em>Бросьте кость</em></div>
-          <div class="dice-buttons">
-            <button data-die="4">d4</button><button data-die="6">d6</button><button data-die="8">d8</button>
-            <button data-die="10">d10</button><button data-die="12">d12</button><button data-die="20">d20</button><button data-die="100">d100</button>
-          </div>
-        </article>
-        <article class="panel initiative-panel">
-          <div class="panel-head"><div><span class="eyebrow">Живой трекер боя</span><h3>Инициатива и здоровье</h3></div><button class="round-button" id="add-initiative">＋</button></div>
-          <div class="combat-master-status" id="combat-master-status"></div>
-          <div id="initiative-list"></div>
-          <button class="ghost-button full-button" id="sort-initiative">Отсортировать по инициативе</button>
-          <div class="combat-master-actions">
-            <button class="primary-button" id="start-combat">Начать бой</button>
-            <button class="ghost-button" id="next-combat-turn">Следующий ход</button>
-            <button class="delete" id="end-combat">Завершить бой</button>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section class="page" id="workshop">
-      <div class="section-heading">
-        <div><span class="eyebrow">Только для мастера</span><h2>Книга мастера</h2></div>
-        <span class="storage-status" id="storage-status">Подключение к базе...</span>
-      </div>
-      <div class="master-tabs">
-        <button class="filter active" data-master-tab="roster">Персонажи и NPC</button>
-        <button class="filter" data-master-tab="notebook">Записная книжка</button>
+      <div class="campaign-card">
+        <span class="eyebrow">Текущая кампания</span>
+        <strong id="sidebar-campaign-name">Пепельный Трон</strong>
+        <div class="progress"><i></i></div>
+        <small id="sidebar-campaign-meta">12 сессий · Глава III</small>
       </div>
 
-      <div class="master-view active" id="master-roster">
-        <aside class="panel collection-sidebar">
-          <div class="panel-head">
-            <div><span class="eyebrow">Твои пачки</span><h3>Группы</h3></div>
-            <button class="round-button" id="new-pack">＋</button>
-          </div>
-          <div id="pack-list" class="pack-list"></div>
-        </aside>
-        <article class="panel roster-panel">
-          <div class="panel-head">
-            <div><span class="eyebrow" id="active-pack-type">Кампания</span><h3 id="active-pack-name">Все персонажи</h3></div>
-            <div class="panel-actions">
-              <button class="ghost-button" id="rename-pack">Переименовать</button>
-              <button class="delete" id="delete-pack">Удалить пачку</button>
-              <button class="ghost-button" id="new-npc">＋ NPC</button>
-              <button class="primary-button" id="new-entity">＋ Герой</button>
-            </div>
-          </div>
-          <div id="master-roster-grid" class="master-roster-grid"></div>
-        </article>
-      </div>
+      <button class="profile" id="master-profile">
+        <span class="avatar">DM</span>
+        <span><strong>Хранитель мира</strong><small>Dungeon Master</small></span>
+        <b>•••</b>
+      </button>
+    </aside>
 
-      <div class="master-view" id="master-notebook">
-        <aside class="panel collection-sidebar">
-          <div class="panel-head">
-            <div><span class="eyebrow">Твои разделы</span><h3>Оглавление</h3></div>
-            <button class="round-button" id="new-note-section">＋</button>
-          </div>
-          <div id="note-section-list" class="pack-list"></div>
-        </aside>
-        <article class="panel notes-panel">
-          <div class="panel-head">
-            <div><span class="eyebrow">Личные записи</span><h3 id="active-note-section">Все записи</h3></div>
-            <div class="panel-actions"><button class="ghost-button" id="rename-note-section">Переименовать раздел</button><button class="primary-button" id="new-note">＋ Новая запись</button></div>
-          </div>
-          <div class="notes-layout">
-            <div id="master-notes" class="master-notes"></div>
-            <form id="note-editor" class="note-editor">
-              <input id="note-title" placeholder="Название записи" required>
-              <input id="note-tags" placeholder="Теги через запятую">
-              <textarea id="note-body" placeholder="Планы, секреты, диалоги, последствия решений..." required></textarea>
-              <div class="editor-actions">
-                <button type="button" class="delete" id="delete-note">Удалить</button>
-                <button class="primary-button">Сохранить запись</button>
-              </div>
-            </form>
-          </div>
-        </article>
-      </div>
-    </section>
-  </main>
-
-  <dialog id="modal">
-    <form method="dialog" id="modal-form">
-      <div class="modal-head"><div><span class="eyebrow">Новая запись</span><h3 id="modal-title">Добавить</h3></div><button type="button" class="modal-close" data-close-dialog="modal">×</button></div>
-      <div id="modal-fields"></div>
-      <div class="modal-actions"><button type="button" class="ghost-button" data-close-dialog="modal">Отмена</button><button value="default" class="primary-button" id="modal-submit">Сохранить</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="sheet-dialog" class="sheet-dialog">
-    <form method="dialog" id="sheet-form">
-      <div class="modal-head"><div><span class="eyebrow">Dungeons & Dragons · лист персонажа</span><h3 id="sheet-heading">Персонаж</h3></div><button type="button" class="modal-close" data-close-dialog="sheet-dialog">×</button></div>
-      <div class="sheet-tabs">
-        <button type="button" class="active" data-sheet-tab="main">Основной лист</button>
-        <button type="button" data-sheet-tab="spells">Заклинания</button>
-      </div>
-      <section class="player-access-panel">
+    <main>
+      <header class="topbar">
+        <button class="mobile-menu" id="mobile-menu">☰</button>
         <div>
-          <span class="eyebrow">Доступ игрока</span>
-          <strong>Личный вход к этому листу</strong>
-          <small id="player-access-status">Вход ещё не настроен</small>
+          <span class="eyebrow" id="topbar-caption">Кампания</span>
+          <h1 id="page-title">Добрый вечер, Хранитель</h1>
         </div>
-        <label class="access-toggle"><input id="player-access-enabled" type="checkbox"> Разрешить игроку открывать лист</label>
-        <label>Логин<input id="player-access-login" autocomplete="off" placeholder="например, daria"></label>
-        <label>Новый пароль<input id="player-access-password" type="password" autocomplete="new-password" placeholder="минимум 6 символов"></label>
-        <button type="button" class="ghost-button" id="save-player-access">Сохранить доступ</button>
-        <button type="button" class="delete" id="delete-player-access">Удалить вход</button>
-      </section>
-      <div class="official-sheet sheet-tab-page active" id="sheet-tab-main">
-        <div class="sheet-identity">
-          <div class="portrait-editor">
-            <img id="sheet-portrait-preview" alt="Портрет персонажа">
-            <button type="button" class="ghost-button" id="upload-character-portrait">Загрузить портрет</button>
-            <button type="button" class="delete" id="remove-character-portrait">Убрать</button>
-            <input id="character-portrait-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
-          </div>
-          <label class="character-name">Имя персонажа<input name="name" required></label>
-          <div class="identity-fields">
-            <label>Класс и уровень<div class="joined-inputs"><input name="className"><input name="level" type="number" min="1" max="20"></div></label>
-            <label>Предыстория<input name="background"></label>
-            <label>Имя игрока<input name="player"></label>
-            <label>Раса<input name="race"></label>
-            <label>Мировоззрение<input name="alignment"></label>
-            <label>Опыт<input name="xp" type="number" min="0"></label>
-            <label class="hidden-field">Тип<select name="kind"><option value="player">Игрок</option><option value="npc">NPC</option></select></label>
-            <label class="hidden-field">Пачка<select name="packId" id="sheet-pack"></select></label>
-          </div>
+        <div class="top-actions">
+          <a class="ghost-button player-side-link" href="/player.html" target="_blank">Сторона игрока</a>
+          <label class="search"
+            ><span>⌕</span><input id="global-search" placeholder="Найти в хрониках..."
+          /></label>
+          <button class="icon-button" title="Уведомления" data-message="Новых уведомлений нет">
+            ♧<i></i>
+          </button>
+          <button class="primary-button" id="quick-add">＋ Новая запись</button>
         </div>
-
-        <div class="sheet-columns">
-          <div class="sheet-column left-column">
-            <div class="ability-grid" id="ability-grid"></div>
-            <div class="boxed-block saves-block"><h4>Спасброски</h4><div id="save-proficiencies" class="official-check-list"></div></div>
-            <div class="boxed-block skills-block"><h4>Навыки</h4><div id="skill-proficiencies" class="official-check-list"></div></div>
-            <div class="passive-box"><strong id="sheet-passive">10</strong><span>Пассивная внимательность</span></div>
-            <label class="lined-box">Прочие владения и языки<textarea name="proficiencies"></textarea></label>
-          </div>
-
-          <div class="sheet-column center-column">
-            <div class="quick-stats">
-              <label class="shield-stat">Класс Доспеха<input name="ac" type="number"></label>
-              <div class="outlined-stat"><strong id="sheet-initiative">+0</strong><span>Инициатива</span></div>
-              <label class="outlined-stat">Скорость<input name="speed" type="number"></label>
-            </div>
-            <div class="inspiration-row">
-              <label><input name="inspiration" type="checkbox"> Вдохновение</label>
-              <div><strong id="sheet-prof">+2</strong><span>Бонус мастерства</span></div>
-            </div>
-            <div class="hp-block">
-              <label>Максимум хитов<input name="maxHp" type="number"></label>
-              <label class="big-hp">Текущие хиты<input name="hp" type="number"></label>
-              <label class="big-hp">Временные хиты<input name="tempHp" type="number"></label>
-            </div>
-            <div class="rest-grid">
-              <label>Тип кости хитов<select name="hitDieType"><option value="6">d6</option><option value="8">d8</option><option value="10">d10</option><option value="12">d12</option></select></label>
-              <label>Всего костей хитов<input name="hitDiceTotal" type="number" min="0"></label>
-              <label>Использовано костей<input name="usedHitDice" type="number" min="0"></label>
-              <fieldset class="death-saves"><legend>Спасброски от смерти</legend><label>Успехи<input name="deathSuccesses" type="number" min="0" max="3"></label><label>Провалы<input name="deathFailures" type="number" min="0" max="3"></label></fieldset>
-            </div>
-            <section class="feature-editor attacks-box"><div class="feature-editor-head"><strong>Атаки и оружие</strong><button type="button" class="ghost-button" id="add-attack-card">＋ Оружие</button></div><div id="attack-cards-editor"></div></section>
-            <div class="coins-row">
-              <label>ММ<input name="cp" type="number"></label><label>СМ<input name="sp" type="number"></label><label>ЭМ<input name="ep" type="number"></label><label>ЗМ<input name="gold" type="number"></label><label>ПМ<input name="pp" type="number"></label>
-            </div>
-            <label class="lined-box equipment-box">Снаряжение<textarea name="equipment"></textarea></label>
-          </div>
-
-          <div class="sheet-column right-column">
-            <section class="feature-editor personality-box"><div class="feature-editor-head"><strong>Черты характера</strong><button type="button" class="ghost-button" data-add-trait="personality">＋ Черта</button></div><div data-trait-cards="personality"></div></section>
-            <section class="feature-editor personality-box"><div class="feature-editor-head"><strong>Идеалы</strong><button type="button" class="ghost-button" data-add-trait="ideals">＋ Идеал</button></div><div data-trait-cards="ideals"></div></section>
-            <section class="feature-editor personality-box"><div class="feature-editor-head"><strong>Привязанности</strong><button type="button" class="ghost-button" data-add-trait="bonds">＋ Привязанность</button></div><div data-trait-cards="bonds"></div></section>
-            <section class="feature-editor personality-box"><div class="feature-editor-head"><strong>Слабости</strong><button type="button" class="ghost-button" data-add-trait="flaws">＋ Слабость</button></div><div data-trait-cards="flaws"></div></section>
-            <section class="feature-editor features-box"><div class="feature-editor-head"><strong>Умения и особенности</strong><button type="button" class="ghost-button" id="add-feature-card">＋ Способность</button></div><div id="feature-cards-editor"></div></section>
-            <label class="lined-box dm-notes-box">Заметки мастера<textarea name="dmNotes"></textarea></label>
-          </div>
-        </div>
-      </div>
-      <div class="spellbook sheet-tab-page" id="sheet-tab-spells">
-        <div class="grimoire-cover">
-          <div class="grimoire-rune">✦</div>
-          <div><span>Личный гримуар</span><strong id="grimoire-owner">Книга заклинаний</strong></div>
-          <div class="grimoire-rune">✦</div>
-        </div>
-        <div class="grimoire-spread">
-          <section class="grimoire-page grimoire-left">
-            <div class="page-ornament">༺ ✦ ༻</div>
-            <div class="spellbook-heading">
-              <label>Класс заклинателя<input name="spellcastingClass"></label>
-              <label>Базовая характеристика<select name="spellAbility"><option value="int">Интеллект</option><option value="wis">Мудрость</option><option value="cha">Харизма</option></select></label>
-              <div class="spell-auto-stat"><span>Сл спасброска</span><strong id="spell-save-dc">10</strong></div>
-              <div class="spell-auto-stat"><span>Бонус атаки</span><strong id="spell-attack-bonus">+2</strong></div>
-            </div>
-            <div class="page-title"><i></i><span>Ячейки заклинаний</span><i></i></div>
-            <div class="spell-slots" id="spell-slots"></div>
-            <label class="spell-notes">Заметки о магии, компоненты и фокусы<textarea name="spellNotes"></textarea></label>
-            <div class="arcane-circle"><span>✧</span><i></i><b></b></div>
-          </section>
-          <section class="grimoire-page grimoire-right">
-            <div class="page-ornament">༺ ✦ ༻</div>
-            <div class="spell-toolbar">
-              <div><span>Записи арканиста</span><h3>Заклинания</h3></div>
-              <button type="button" class="primary-button" id="add-spell">＋ Новое</button>
-            </div>
-            <div class="spell-list" id="spell-list"></div>
-          </section>
-        </div>
-      </div>
-      <div class="modal-actions"><button type="button" class="delete" id="delete-sheet">Удалить</button><button type="button" class="ghost-button" data-close-dialog="sheet-dialog">Отмена</button><button value="default" class="primary-button">Сохранить лист</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="npc-dialog" class="npc-dialog">
-    <form method="dialog" id="npc-form">
-      <div class="modal-head"><div><span class="eyebrow">Досье мастера</span><h3 id="npc-dialog-title">NPC</h3></div><button type="button" class="modal-close" data-close-dialog="npc-dialog">×</button></div>
-      <div class="npc-dossier-grid">
-        <section class="npc-portrait-panel"><img id="npc-portrait-preview" alt="Портрет NPC"><label>Портрет из медиатеки<select name="portraitUrl" id="npc-portrait-select"></select></label></section>
-        <section class="npc-section npc-main"><h4>Основное</h4><div class="npc-fields"><label>Имя<input name="name" required></label><label>Прозвище<input name="nickname"></label><label>Раса<input name="race"></label><label>Возраст<input name="age"></label><label>Пол<input name="gender"></label><label>Где живёт / найти<select name="locationId" id="npc-location"></select></label><label>Фракция / организация<select name="factionId" id="npc-faction"></select></label><label>Статус<select name="status"><option value="alive">Жив</option><option value="dead">Мёртв</option><option value="missing">Пропал</option><option value="unknown">Неизвестно</option></select></label></div></section>
-        <section class="npc-section"><h4>Характер и внешность</h4><label>Внешность<textarea name="appearance"></textarea></label><label>Характер и манера речи<textarea name="character"></textarea></label><label>Мотивы<textarea name="motives"></textarea></label><label>Страхи / слабости<textarea name="fears"></textarea></label></section>
-        <section class="npc-section"><h4>Отношения</h4><label>Отношение к партии<select name="partyAttitude"><option value="-2">Враждебный</option><option value="-1">Неприязненный</option><option value="0">Нейтральный</option><option value="1">Дружелюбный</option><option value="2">Союзник</option></select></label><label>Связи с другими NPC<textarea name="connections"></textarea></label><label>Что знает / секреты<textarea name="secrets"></textarea></label></section>
-        <section class="npc-section"><h4>Для игры</h4><label>Заметки мастера<textarea name="dmNotes"></textarea></label><div class="npc-combat-fields"><label>AC<input name="ac" type="number" min="0"></label><label>HP<input name="hp" type="number" min="0"></label></div><label>Пара атак<textarea name="combatAttacks"></textarea></label></section>
-      </div>
-      <div class="modal-actions"><button type="button" class="delete" id="delete-npc">Удалить NPC</button><button type="button" class="ghost-button" data-close-dialog="npc-dialog">Отмена</button><button value="default" class="primary-button">Сохранить досье</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="lore-view-dialog" class="lore-view-dialog">
-    <article id="lore-view-content"></article>
-  </dialog>
-
-  <dialog id="lore-dialog" class="lore-dialog">
-    <form method="dialog" id="lore-form">
-      <div class="lore-sheet-head">
-        <div><span class="eyebrow">Энциклопедия мира</span><h2 id="lore-sheet-heading">Новая запись</h2></div>
-        <button type="button" class="modal-close" data-close-dialog="lore-dialog">×</button>
-      </div>
-      <div class="lore-sheet-meta">
-        <label>Тип записи<select name="type" id="lore-type"><option value="Место">Место</option><option value="Фракция">Фракция</option><option value="Легенда">Легенда</option><option value="Персона">Персона</option><option value="Событие">Событие</option><option value="Другое">Другое</option></select></label>
-        <label>Название<input name="title" required></label>
-      </div>
-      <section class="lore-access-box">
-        <label class="lore-public-toggle"><input name="visibleToPlayers" type="checkbox"> Показывать всем игрокам</label>
-        <div><strong>Или только конкретным персонажам</strong><span>Отметьте тех, кому известна эта запись.</span></div>
-        <div id="lore-player-access" class="lore-player-access"></div>
-      </section>
-      <label class="lore-ideology" id="lore-ideology">Идеология фракции<textarea name="ideology" placeholder="Ценности, убеждения, цели и методы фракции..."></textarea></label>
-      <label class="lore-description">Подробное описание<textarea name="text" required placeholder="Всё, что важно знать об этой записи..."></textarea></label>
-      <section class="lore-images-editor">
-        <div><strong>Изображения записи</strong><button type="button" class="ghost-button" id="upload-lore-image">＋ Добавить изображение</button><input id="lore-image-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden></div>
-        <small class="lore-image-hint">Лучше всего подходит горизонтальное изображение 16:9, от 1200 × 675 px. Поддерживаются JPG, PNG, WebP и GIF.</small>
-        <div id="lore-image-list"></div>
-      </section>
-      <div class="modal-actions"><button type="button" class="delete" id="delete-lore-sheet">Удалить</button><button type="button" class="ghost-button" data-close-dialog="lore-dialog">Отмена</button><button value="default" class="primary-button">Сохранить запись</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="session-dialog" class="session-dialog">
-    <form method="dialog" id="session-form">
-      <div class="modal-head"><div><span class="eyebrow">Календарь кампании</span><h3 id="session-dialog-title">Новая сессия</h3></div><button type="button" class="modal-close" data-close-dialog="session-dialog">×</button></div>
-      <div class="session-form-grid">
-        <label class="wide">Название сессии<input name="title" required></label>
-        <label>Дата<input name="date" type="date" required></label>
-        <label>Время<input name="time" type="time"></label>
-        <label>Статус<select name="status"><option value="planned">Запланирована</option><option value="completed">Сыграна</option><option value="cancelled">Отменена</option></select></label>
-        <label class="wide">План и подготовка<textarea name="plan" placeholder="Что должно произойти, сцены, NPC, зацепки..."></textarea></label>
-        <label class="wide">Краткое содержание после сессии<textarea name="summary" placeholder="Необязательно. Что произошло на игре, важные решения и последствия..."></textarea></label>
-      </div>
-      <div class="modal-actions"><button type="button" class="delete" id="delete-session">Удалить</button><button type="button" class="ghost-button" data-close-dialog="session-dialog">Отмена</button><button value="default" class="primary-button">Сохранить сессию</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="monster-dialog" class="monster-dialog">
-    <form method="dialog" id="monster-form">
-      <div class="modal-head"><div><span class="eyebrow">Бестиарий мастера</span><h3 id="monster-dialog-title">Существо</h3></div><button type="button" class="modal-close" data-close-dialog="monster-dialog">×</button></div>
-      <div class="monster-form-grid">
-        <label class="wide">Название<input name="name" required></label><label>Тип<input name="type" placeholder="Зверь, нежить..."></label><label>Размер<input name="size"></label><label>Мировоззрение<input name="alignment"></label>
-        <label>Класс доспеха<input name="ac" type="number"></label><label>Хиты<input name="hp" type="number"></label><label>Кость хитов<input name="hitDice"></label><label>Скорость<input name="speed"></label>
-        <div class="monster-abilities-editor" id="monster-abilities-editor"></div>
-        <fieldset class="wide monster-saves"><legend>Спасброски с преимуществом</legend><div id="monster-advantage-saves"></div></fieldset>
-        <label class="wide">Навыки<input name="skills"></label><label>Иммунитеты к урону<textarea name="damageImmunities"></textarea></label><label>Сопротивления<textarea name="damageResistances"></textarea></label><label>Уязвимости<textarea name="damageVulnerabilities"></textarea></label><label>Иммунитеты к состояниям<textarea name="conditionImmunities"></textarea></label>
-        <label>Чувства<input name="senses"></label><label>Пассивное восприятие<input name="passivePerception" type="number"></label><label>Языки<input name="languages"></label><label>Опасность CR<input name="cr"></label><label>Опыт XP<input name="xp" type="number"></label><label>Тег кампании<input name="campaignTag"></label>
-        <label class="wide">Особые способности<textarea name="traits"></textarea></label>
-        <section class="wide repeatable-editor"><div><strong>Действия</strong><button type="button" class="ghost-button" id="add-monster-action">＋ Действие</button></div><div id="monster-actions-editor"></div></section>
-        <label class="wide">Реакции<textarea name="reactions"></textarea></label><label class="wide">Легендарные действия<textarea name="legendaryActions"></textarea></label><label class="wide">Логово и действия логова<textarea name="lair"></textarea></label><label class="wide dm-only-field">Заметки мастера<textarea name="dmNotes"></textarea></label>
-      </div>
-      <div class="modal-actions"><button type="button" class="delete" id="delete-monster">Удалить</button><button type="button" class="ghost-button" data-close-dialog="monster-dialog">Отмена</button><button value="default" class="primary-button">Сохранить существо</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="shop-dialog" class="shop-dialog">
-    <form method="dialog" id="shop-form">
-      <div class="modal-head"><div><span class="eyebrow">Торговая книга</span><h3 id="shop-dialog-title">Магазин</h3></div><button type="button" class="modal-close" data-close-dialog="shop-dialog">×</button></div>
-      <div class="shop-form-grid">
-        <label class="wide">Название магазина / имя торговца<input name="name" required></label>
-        <label>Локация<select name="locationId" id="shop-location"></select></label>
-        <label>Статус<select name="status"><option value="open">Открыт</option><option value="closed">Закрыт</option><option value="unavailable">Недоступен</option></select></label>
-        <label class="wide">Описание торговца<textarea name="description"></textarea></label>
-        <section class="wide lore-access-box"><label class="lore-public-toggle"><input name="visibleToPlayers" type="checkbox"> Показывать всем игрокам</label><div><strong>Или конкретным персонажам</strong></div><div id="shop-player-access" class="lore-player-access"></div></section>
-        <section class="wide repeatable-editor"><div><strong>Товары</strong><button type="button" class="ghost-button" id="add-shop-item">＋ Товар</button></div><div id="shop-items-editor"></div></section>
-      </div>
-      <div class="modal-actions"><button type="button" class="delete" id="delete-shop">Удалить</button><button type="button" class="ghost-button" data-close-dialog="shop-dialog">Отмена</button><button value="default" class="primary-button">Сохранить магазин</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="master-login-dialog">
-    <form id="master-login-form">
-      <div class="modal-head"><div><span class="eyebrow">Кабинет мастера</span><h3 id="master-login-title">Вход в мастерскую</h3></div></div>
-      <div class="form-grid">
-        <label class="wide">Логин мастера<input name="username" autocomplete="username" placeholder="Для главного мастера можно оставить пустым"></label>
-        <label class="wide">Пароль<input name="password" type="password" autocomplete="current-password" required></label>
-      </div>
-      <small id="master-login-error"></small>
-      <div class="modal-actions"><button class="primary-button">Войти</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="master-register-dialog">
-    <form id="master-register-form">
-      <div class="modal-head"><div><span class="eyebrow">Приглашение мастера</span><h3>Создать свой кабинет</h3></div></div>
-      <div class="form-grid">
-        <label>Ваше имя<input name="displayName" required></label>
-        <label>Название кампании<input name="campaignName" required></label>
-        <label>Логин<input name="username" autocomplete="username" required></label>
-        <label>Пароль<input name="password" type="password" minlength="6" autocomplete="new-password" required></label>
-      </div>
-      <small id="master-register-error"></small>
-      <div class="modal-actions"><button class="primary-button">Создать кабинет</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="master-account-dialog">
-    <form id="master-account-form" class="master-account-shell">
-      <header class="master-account-head">
-        <div><span class="eyebrow">Личный кабинет</span><h2>Мастерская кампании</h2><p>Настройте настроение, подписи и главный экран своей хроники.</p></div>
-        <div><button type="button" class="delete" id="master-logout">Выйти</button><button class="primary-button">Сохранить изменения</button><button type="button" class="modal-close" data-close-dialog="master-account-dialog">×</button></div>
       </header>
-      <div class="master-account-layout">
-        <div class="master-settings-column">
-          <section class="master-setting-card">
-            <div class="master-setting-title"><span>01</span><div><strong>Кампания и мастер</strong><small>Основные подписи кабинета</small></div></div>
-            <div class="master-setting-grid">
-              <label>Имя мастера<input name="displayName"></label>
-              <label>Название кампании<input name="campaignName" required></label>
-              <label>Глава / статус<input name="campaignChapter" placeholder="Глава III"></label>
-              <label>Приветствие<input name="greeting" placeholder="Добрый вечер"></label>
-              <label class="wide">Описание кампании<textarea name="campaignDescription"></textarea></label>
+
+      <section class="page active" id="overview">
+        <div class="hero-banner">
+          <div class="hero-copy">
+            <span class="eyebrow" id="hero-kicker">Следующая игра · через 3 дня</span>
+            <h2 id="hero-title">Тени над Элдервейлом</h2>
+            <p id="hero-description">
+              Герои добрались до ворот забытого города. За каменной аркой их уже ждёт то, чему не следовало
+              просыпаться.
+            </p>
+            <div class="hero-actions">
+              <button class="primary-button" data-goto="world">Открыть заметки</button>
+              <button class="ghost-button" id="session-button">Начать сессию</button>
+            </div>
+          </div>
+          <div class="moon"><span></span></div>
+          <div class="session-info">
+            <span>СЕССИЯ</span><strong id="hero-session-number">13</strong
+            ><small id="hero-session-name">«За вратами»</small>
+          </div>
+        </div>
+
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Статус кампании</span>
+            <h3>Всё важное перед глазами</h3>
+          </div>
+          <button class="text-button" data-goto="heroes">Все персонажи →</button>
+        </div>
+        <div class="stats-grid">
+          <article class="stat-card">
+            <span class="stat-icon amber">♟</span>
+            <div><small>Героев в пути</small><strong id="heroes-count">0</strong><em>в двух отрядах</em></div>
+          </article>
+          <article class="stat-card">
+            <span class="stat-icon red">♥</span>
+            <div>
+              <small>Среднее здоровье</small><strong id="health-average">0%</strong><em>отряд готов к бою</em>
+            </div>
+          </article>
+          <article class="stat-card">
+            <span class="stat-icon blue">◈</span>
+            <div><small>Сокровища</small><strong id="gold-total">0</strong><em>золотых монет</em></div>
+          </article>
+          <article class="stat-card">
+            <span class="stat-icon violet">✦</span>
+            <div><small>Нити сюжета</small><strong>7</strong><em>3 требуют внимания</em></div>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Отряды</span>
+                <h3>Активные герои</h3>
+              </div>
+              <button class="round-button" data-goto="heroes">＋</button>
+            </div>
+            <div id="overview-party"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Подготовка</span>
+                <h3>До следующей сессии</h3>
+              </div>
+              <span class="counter" id="task-counter">0 / 0</span>
+            </div>
+            <div id="task-list" class="task-list"></div>
+            <form id="task-form" class="inline-form">
+              <input id="task-input" placeholder="Добавить задачу..." required /><button>＋</button>
+            </form>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="heroes">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Группы и листы</span>
+            <h2>Персонажи игроков</h2>
+          </div>
+          <button class="primary-button" data-modal="character">＋ Добавить героя</button>
+        </div>
+        <div class="filter-row" id="character-filters">
+          <button class="filter active" data-group="all">Все герои</button>
+        </div>
+        <section class="player-roster-panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">Самостоятельный вход</span>
+              <h3>Игроки и приглашения</h3>
+            </div>
+          </div>
+          <form id="player-invite-form" class="player-invite-form">
+            <input id="player-invite-name" placeholder="Имя игрока (необязательно)" />
+            <button class="primary-button">Создать ссылку-приглашение</button>
+          </form>
+          <small
+            >Каждая ссылка одноразовая и действует 14 дней. Зарегистрировавшийся игрок получит собственный
+            пустой лист.</small
+          >
+          <div id="player-invite-result" class="player-invite-result hidden"></div>
+          <div id="player-account-roster" class="player-account-roster"></div>
+          <div id="player-invitation-list" class="player-account-roster"></div>
+        </section>
+        <div class="character-grid" id="character-grid"></div>
+      </section>
+
+      <section class="page" id="world">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Мир кампании</span>
+            <h2 id="world-heading">Атлас мира</h2>
+          </div>
+          <button class="primary-button" id="new-lore">＋ Новая запись</button>
+        </div>
+        <div class="world-layout">
+          <article class="map-card">
+            <div class="map-orbit orbit-one"></div>
+            <div class="map-orbit orbit-two"></div>
+            <span class="map-place place-a">Элдервейл<i></i></span>
+            <span class="map-place place-b">Северный предел<i></i></span>
+            <span class="map-place place-c">Пепельные земли<i></i></span>
+            <span class="map-place place-d">Сапфировый берег<i></i></span>
+            <div class="compass">✦</div>
+            <div class="map-caption">
+              <span class="eyebrow">Известный мир</span><strong>Материк Эйра</strong>
+            </div>
+          </article>
+          <div>
+            <div class="filter-row lore-filters">
+              <button class="filter active" data-lore-filter="all">Все</button>
+              <button class="filter" data-lore-filter="Место">Места</button>
+              <button class="filter" data-lore-filter="Фракция">Фракции</button>
+              <button class="filter" data-lore-filter="Легенда">Легенды</button>
+            </div>
+            <div id="lore-list" class="lore-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="bestiary">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Monster Manual кампании</span>
+            <h2>Бестиарий</h2>
+          </div>
+          <button class="primary-button" id="new-monster">＋ Добавить существо</button>
+        </div>
+        <div class="bestiary-filters panel">
+          <label
+            >Тип<select id="monster-filter-type">
+              <option value="all">Все типы</option>
+            </select></label
+          >
+          <label
+            >Опасность<select id="monster-filter-cr">
+              <option value="all">Любая CR</option>
+            </select></label
+          >
+          <label
+            >Тег кампании<select id="monster-filter-tag">
+              <option value="all">Все арки</option>
+            </select></label
+          >
+        </div>
+        <div id="bestiary-grid" class="bestiary-grid"></div>
+      </section>
+
+      <section class="page" id="shops">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Торговцы и ассортимент</span>
+            <h2>Магазины</h2>
+          </div>
+          <button class="primary-button" id="new-shop">＋ Добавить торговца</button>
+        </div>
+        <div id="shop-list" class="shop-list"></div>
+      </section>
+
+      <section class="page" id="media">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Карты, портреты и улики</span>
+            <h2>Медиатека кампании</h2>
+          </div>
+          <button class="primary-button" id="upload-media-button">＋ Загрузить изображение</button>
+        </div>
+        <input
+          id="upload-media-input"
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          hidden
+        />
+        <div class="media-toolbar panel">
+          <label
+            >Категория<select id="media-category">
+              <option value="other">Прочее</option>
+              <option value="portrait">Портрет</option>
+              <option value="artifact">Артефакт</option>
+              <option value="note">Записка</option>
+              <option value="map">Карта</option>
+            </select></label
+          >
+          <label>Название<input id="media-title" placeholder="Необязательно" /></label>
+          <span>JPG, PNG, WebP или GIF · до 10 МБ</span>
+        </div>
+        <div id="media-gallery" class="media-gallery"></div>
+      </section>
+
+      <section class="page" id="calendar">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Планы и хроники</span>
+            <h2>Календарь сессий</h2>
+          </div>
+          <button class="primary-button" id="new-session">＋ Запланировать сессию</button>
+        </div>
+        <div class="calendar-toolbar panel">
+          <button class="ghost-button" id="calendar-prev">←</button>
+          <div>
+            <span class="eyebrow">Игровой месяц</span>
+            <h3 id="calendar-month"></h3>
+          </div>
+          <button class="ghost-button" id="calendar-today">Сегодня</button>
+          <button class="ghost-button" id="calendar-next">→</button>
+        </div>
+        <div class="calendar-layout">
+          <article class="panel calendar-panel">
+            <div class="calendar-weekdays">
+              <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span
+              ><span>Вс</span>
+            </div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+          </article>
+          <aside class="panel session-journal">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Хроника кампании</span>
+                <h3>Сессии и журналы</h3>
+              </div>
+            </div>
+            <div id="session-list" class="session-list"></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="page" id="tools">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Помощник мастера</span>
+            <h2>Броски и расчёты</h2>
+          </div>
+        </div>
+        <div class="tools-grid">
+          <article class="panel dice-panel">
+            <span class="eyebrow">Быстрый бросок</span>
+            <h3>Кости судьбы</h3>
+            <div class="dice-result" id="dice-result">
+              <small>Результат</small><strong>20</strong><em>Бросьте кость</em>
+            </div>
+            <div class="dice-buttons">
+              <button data-die="4">d4</button><button data-die="6">d6</button><button data-die="8">d8</button>
+              <button data-die="10">d10</button><button data-die="12">d12</button
+              ><button data-die="20">d20</button><button data-die="100">d100</button>
+            </div>
+          </article>
+          <article class="panel initiative-panel">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Живой трекер боя</span>
+                <h3>Инициатива и здоровье</h3>
+              </div>
+              <button class="round-button" id="add-initiative">＋</button>
+            </div>
+            <div class="combat-master-status" id="combat-master-status"></div>
+            <div id="initiative-list"></div>
+            <button class="ghost-button full-button" id="sort-initiative">Отсортировать по инициативе</button>
+            <div class="combat-master-actions">
+              <button class="primary-button" id="start-combat">Начать бой</button>
+              <button class="ghost-button" id="next-combat-turn">Следующий ход</button>
+              <button class="delete" id="end-combat">Завершить бой</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="workshop">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Только для мастера</span>
+            <h2>Книга мастера</h2>
+          </div>
+          <span class="storage-status" id="storage-status">Подключение к базе...</span>
+        </div>
+        <div class="master-tabs">
+          <button class="filter active" data-master-tab="roster">Персонажи и NPC</button>
+          <button class="filter" data-master-tab="notebook">Записная книжка</button>
+        </div>
+
+        <div class="master-view active" id="master-roster">
+          <aside class="panel collection-sidebar">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Твои пачки</span>
+                <h3>Группы</h3>
+              </div>
+              <button class="round-button" id="new-pack">＋</button>
+            </div>
+            <div id="pack-list" class="pack-list"></div>
+          </aside>
+          <article class="panel roster-panel">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow" id="active-pack-type">Кампания</span>
+                <h3 id="active-pack-name">Все персонажи</h3>
+              </div>
+              <div class="panel-actions">
+                <button class="ghost-button" id="rename-pack">Переименовать</button>
+                <button class="delete" id="delete-pack">Удалить пачку</button>
+                <button class="ghost-button" id="new-npc">＋ NPC</button>
+                <button class="primary-button" id="new-entity">＋ Герой</button>
+              </div>
+            </div>
+            <div id="master-roster-grid" class="master-roster-grid"></div>
+          </article>
+        </div>
+
+        <div class="master-view" id="master-notebook">
+          <aside class="panel collection-sidebar">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Твои разделы</span>
+                <h3>Оглавление</h3>
+              </div>
+              <button class="round-button" id="new-note-section">＋</button>
+            </div>
+            <div id="note-section-list" class="pack-list"></div>
+          </aside>
+          <article class="panel notes-panel">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Личные записи</span>
+                <h3 id="active-note-section">Все записи</h3>
+              </div>
+              <div class="panel-actions">
+                <button class="ghost-button" id="rename-note-section">Переименовать раздел</button
+                ><button class="primary-button" id="new-note">＋ Новая запись</button>
+              </div>
+            </div>
+            <div class="notes-layout">
+              <div id="master-notes" class="master-notes"></div>
+              <form id="note-editor" class="note-editor">
+                <input id="note-title" placeholder="Название записи" required />
+                <input id="note-tags" placeholder="Теги через запятую" />
+                <textarea
+                  id="note-body"
+                  placeholder="Планы, секреты, диалоги, последствия решений..."
+                  required
+                ></textarea>
+                <div class="editor-actions">
+                  <button type="button" class="delete" id="delete-note">Удалить</button>
+                  <button class="primary-button">Сохранить запись</button>
+                </div>
+              </form>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="modal">
+      <form method="dialog" id="modal-form">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow">Новая запись</span>
+            <h3 id="modal-title">Добавить</h3>
+          </div>
+          <button type="button" class="modal-close" data-close-dialog="modal">×</button>
+        </div>
+        <div id="modal-fields"></div>
+        <div class="modal-actions">
+          <button type="button" class="ghost-button" data-close-dialog="modal">Отмена</button
+          ><button value="default" class="primary-button" id="modal-submit">Сохранить</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="sheet-dialog" class="sheet-dialog">
+      <form method="dialog" id="sheet-form">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow">Dungeons & Dragons · лист персонажа</span>
+            <h3 id="sheet-heading">Персонаж</h3>
+          </div>
+          <button type="button" class="modal-close" data-close-dialog="sheet-dialog">×</button>
+        </div>
+        <div class="sheet-tabs">
+          <button type="button" class="active" data-sheet-tab="main">Основной лист</button>
+          <button type="button" data-sheet-tab="spells">Заклинания</button>
+        </div>
+        <section class="player-access-panel">
+          <div>
+            <span class="eyebrow">Доступ игрока</span>
+            <strong>Личный вход к этому листу</strong>
+            <small id="player-access-status">Вход ещё не настроен</small>
+          </div>
+          <label class="access-toggle"
+            ><input id="player-access-enabled" type="checkbox" /> Разрешить игроку открывать лист</label
+          >
+          <label
+            >Логин<input id="player-access-login" autocomplete="off" placeholder="например, daria"
+          /></label>
+          <label
+            >Новый пароль<input
+              id="player-access-password"
+              type="password"
+              autocomplete="new-password"
+              placeholder="минимум 6 символов"
+          /></label>
+          <button type="button" class="ghost-button" id="save-player-access">Сохранить доступ</button>
+          <button type="button" class="delete" id="delete-player-access">Удалить вход</button>
+        </section>
+        <div class="official-sheet sheet-tab-page active" id="sheet-tab-main">
+          <div class="sheet-identity">
+            <div class="portrait-editor">
+              <img id="sheet-portrait-preview" alt="Портрет персонажа" />
+              <button type="button" class="ghost-button" id="upload-character-portrait">
+                Загрузить портрет
+              </button>
+              <button type="button" class="delete" id="remove-character-portrait">Убрать</button>
+              <input
+                id="character-portrait-input"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                hidden
+              />
+            </div>
+            <label class="character-name">Имя персонажа<input name="name" required /></label>
+            <div class="identity-fields">
+              <label
+                >Класс и уровень
+                <div class="joined-inputs">
+                  <input name="className" /><input name="level" type="number" min="1" max="20" /></div
+              ></label>
+              <label>Предыстория<input name="background" /></label>
+              <label>Имя игрока<input name="player" /></label>
+              <label>Раса<input name="race" /></label>
+              <label>Мировоззрение<input name="alignment" /></label>
+              <label>Опыт<input name="xp" type="number" min="0" /></label>
+              <label class="hidden-field"
+                >Тип<select name="kind">
+                  <option value="player">Игрок</option>
+                  <option value="npc">NPC</option>
+                </select></label
+              >
+              <label class="hidden-field">Пачка<select name="packId" id="sheet-pack"></select></label>
+            </div>
+          </div>
+
+          <div class="sheet-columns">
+            <div class="sheet-column left-column">
+              <div class="ability-grid" id="ability-grid"></div>
+              <div class="boxed-block saves-block">
+                <h4>Спасброски</h4>
+                <div id="save-proficiencies" class="official-check-list"></div>
+              </div>
+              <div class="boxed-block skills-block">
+                <h4>Навыки</h4>
+                <div id="skill-proficiencies" class="official-check-list"></div>
+              </div>
+              <div class="passive-box">
+                <strong id="sheet-passive">10</strong><span>Пассивная внимательность</span>
+              </div>
+              <label class="lined-box"
+                >Прочие владения и языки<textarea name="proficiencies"></textarea>
+              </label>
+            </div>
+
+            <div class="sheet-column center-column">
+              <div class="quick-stats">
+                <label class="shield-stat">Класс Доспеха<input name="ac" type="number" /></label>
+                <div class="outlined-stat">
+                  <strong id="sheet-initiative">+0</strong><span>Инициатива</span>
+                </div>
+                <label class="outlined-stat">Скорость<input name="speed" type="number" /></label>
+              </div>
+              <div class="inspiration-row">
+                <label><input name="inspiration" type="checkbox" /> Вдохновение</label>
+                <div><strong id="sheet-prof">+2</strong><span>Бонус мастерства</span></div>
+              </div>
+              <div class="hp-block">
+                <label>Максимум хитов<input name="maxHp" type="number" /></label>
+                <label class="big-hp">Текущие хиты<input name="hp" type="number" /></label>
+                <label class="big-hp">Временные хиты<input name="tempHp" type="number" /></label>
+              </div>
+              <div class="rest-grid">
+                <label
+                  >Тип кости хитов<select name="hitDieType">
+                    <option value="6">d6</option>
+                    <option value="8">d8</option>
+                    <option value="10">d10</option>
+                    <option value="12">d12</option>
+                  </select></label
+                >
+                <label>Всего костей хитов<input name="hitDiceTotal" type="number" min="0" /></label>
+                <label>Использовано костей<input name="usedHitDice" type="number" min="0" /></label>
+                <fieldset class="death-saves">
+                  <legend>Спасброски от смерти</legend>
+                  <label>Успехи<input name="deathSuccesses" type="number" min="0" max="3" /></label
+                  ><label>Провалы<input name="deathFailures" type="number" min="0" max="3" /></label>
+                </fieldset>
+              </div>
+              <section class="feature-editor attacks-box">
+                <div class="feature-editor-head">
+                  <strong>Атаки и оружие</strong
+                  ><button type="button" class="ghost-button" id="add-attack-card">＋ Оружие</button>
+                </div>
+                <div id="attack-cards-editor"></div>
+              </section>
+              <div class="coins-row">
+                <label>ММ<input name="cp" type="number" /></label
+                ><label>СМ<input name="sp" type="number" /></label
+                ><label>ЭМ<input name="ep" type="number" /></label
+                ><label>ЗМ<input name="gold" type="number" /></label
+                ><label>ПМ<input name="pp" type="number" /></label>
+              </div>
+              <label class="lined-box equipment-box">Снаряжение<textarea name="equipment"></textarea></label>
+            </div>
+
+            <div class="sheet-column right-column">
+              <section class="feature-editor personality-box">
+                <div class="feature-editor-head">
+                  <strong>Черты характера</strong
+                  ><button type="button" class="ghost-button" data-add-trait="personality">＋ Черта</button>
+                </div>
+                <div data-trait-cards="personality"></div>
+              </section>
+              <section class="feature-editor personality-box">
+                <div class="feature-editor-head">
+                  <strong>Идеалы</strong
+                  ><button type="button" class="ghost-button" data-add-trait="ideals">＋ Идеал</button>
+                </div>
+                <div data-trait-cards="ideals"></div>
+              </section>
+              <section class="feature-editor personality-box">
+                <div class="feature-editor-head">
+                  <strong>Привязанности</strong
+                  ><button type="button" class="ghost-button" data-add-trait="bonds">＋ Привязанность</button>
+                </div>
+                <div data-trait-cards="bonds"></div>
+              </section>
+              <section class="feature-editor personality-box">
+                <div class="feature-editor-head">
+                  <strong>Слабости</strong
+                  ><button type="button" class="ghost-button" data-add-trait="flaws">＋ Слабость</button>
+                </div>
+                <div data-trait-cards="flaws"></div>
+              </section>
+              <section class="feature-editor features-box">
+                <div class="feature-editor-head">
+                  <strong>Умения и особенности</strong
+                  ><button type="button" class="ghost-button" id="add-feature-card">＋ Способность</button>
+                </div>
+                <div id="feature-cards-editor"></div>
+              </section>
+              <label class="lined-box dm-notes-box"
+                >Заметки мастера<textarea name="dmNotes"></textarea>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="spellbook sheet-tab-page" id="sheet-tab-spells">
+          <div class="grimoire-cover">
+            <div class="grimoire-rune">✦</div>
+            <div><span>Личный гримуар</span><strong id="grimoire-owner">Книга заклинаний</strong></div>
+            <div class="grimoire-rune">✦</div>
+          </div>
+          <div class="grimoire-spread">
+            <section class="grimoire-page grimoire-left">
+              <div class="page-ornament">༺ ✦ ༻</div>
+              <div class="spellbook-heading">
+                <label>Класс заклинателя<input name="spellcastingClass" /></label>
+                <label
+                  >Базовая характеристика<select name="spellAbility">
+                    <option value="int">Интеллект</option>
+                    <option value="wis">Мудрость</option>
+                    <option value="cha">Харизма</option>
+                  </select></label
+                >
+                <div class="spell-auto-stat">
+                  <span>Сл спасброска</span><strong id="spell-save-dc">10</strong>
+                </div>
+                <div class="spell-auto-stat">
+                  <span>Бонус атаки</span><strong id="spell-attack-bonus">+2</strong>
+                </div>
+              </div>
+              <div class="page-title"><i></i><span>Ячейки заклинаний</span><i></i></div>
+              <div class="spell-slots" id="spell-slots"></div>
+              <label class="spell-notes"
+                >Заметки о магии, компоненты и фокусы<textarea name="spellNotes"></textarea>
+              </label>
+              <div class="arcane-circle"><span>✧</span><i></i><b></b></div>
+            </section>
+            <section class="grimoire-page grimoire-right">
+              <div class="page-ornament">༺ ✦ ༻</div>
+              <div class="spell-toolbar">
+                <div>
+                  <span>Записи арканиста</span>
+                  <h3>Заклинания</h3>
+                </div>
+                <button type="button" class="primary-button" id="add-spell">＋ Новое</button>
+              </div>
+              <div class="spell-list" id="spell-list"></div>
+            </section>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="delete" id="delete-sheet">Удалить</button
+          ><button type="button" class="ghost-button" data-close-dialog="sheet-dialog">Отмена</button
+          ><button value="default" class="primary-button">Сохранить лист</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="npc-dialog" class="npc-dialog">
+      <form method="dialog" id="npc-form">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow">Досье мастера</span>
+            <h3 id="npc-dialog-title">NPC</h3>
+          </div>
+          <button type="button" class="modal-close" data-close-dialog="npc-dialog">×</button>
+        </div>
+        <div class="npc-dossier-grid">
+          <section class="npc-portrait-panel">
+            <img id="npc-portrait-preview" alt="Портрет NPC" /><label
+              >Портрет из медиатеки<select name="portraitUrl" id="npc-portrait-select"></select
+            ></label>
+          </section>
+          <section class="npc-section npc-main">
+            <h4>Основное</h4>
+            <div class="npc-fields">
+              <label>Имя<input name="name" required /></label><label>Прозвище<input name="nickname" /></label
+              ><label>Раса<input name="race" /></label><label>Возраст<input name="age" /></label
+              ><label>Пол<input name="gender" /></label
+              ><label>Где живёт / найти<select name="locationId" id="npc-location"></select></label
+              ><label>Фракция / организация<select name="factionId" id="npc-faction"></select></label
+              ><label
+                >Статус<select name="status">
+                  <option value="alive">Жив</option>
+                  <option value="dead">Мёртв</option>
+                  <option value="missing">Пропал</option>
+                  <option value="unknown">Неизвестно</option>
+                </select></label
+              >
             </div>
           </section>
-          <section class="master-setting-card">
-            <div class="master-setting-title"><span>02</span><div><strong>Облик архива</strong><small>Название, цвет и мир</small></div></div>
-            <div class="master-setting-grid">
-              <label>Название сайта<input name="brandTitle" placeholder="Архив мастера"></label>
-              <label>Надпись над названием<input name="brandEyebrow" placeholder="Личная летопись"></label>
-              <label>Название атласа<input name="worldTitle" placeholder="Атлас мира"></label>
-              <label class="color-setting">Акцентный цвет<input name="accentColor" type="color" value="#d7aa5e"></label>
-            </div>
+          <section class="npc-section">
+            <h4>Характер и внешность</h4>
+            <label>Внешность<textarea name="appearance"></textarea></label
+            ><label>Характер и манера речи<textarea name="character"></textarea></label
+            ><label>Мотивы<textarea name="motives"></textarea></label
+            ><label>Страхи / слабости<textarea name="fears"></textarea></label>
           </section>
-          <section class="master-setting-card">
-            <div class="master-setting-title"><span>03</span><div><strong>Главный баннер</strong><small>Пустые поля подхватят ближайшую сессию</small></div></div>
-            <div class="master-setting-grid">
-              <label>Заголовок<input name="heroTitle" placeholder="Автоматически из ближайшей сессии"></label>
-              <label>Короткая подпись<input name="heroKicker" placeholder="Автоматически из ближайшей сессии"></label>
-              <label class="wide">Фоновое изображение<input name="heroImageUrl" placeholder="https://..."></label>
-              <label class="wide">Описание баннера<textarea name="heroDescription" placeholder="Автоматически из плана ближайшей сессии"></textarea></label>
-            </div>
+          <section class="npc-section">
+            <h4>Отношения</h4>
+            <label
+              >Отношение к партии<select name="partyAttitude">
+                <option value="-2">Враждебный</option>
+                <option value="-1">Неприязненный</option>
+                <option value="0">Нейтральный</option>
+                <option value="1">Дружелюбный</option>
+                <option value="2">Союзник</option>
+              </select></label
+            ><label>Связи с другими NPC<textarea name="connections"></textarea></label
+            ><label>Что знает / секреты<textarea name="secrets"></textarea></label>
           </section>
-          <section class="master-setting-card master-invite-card">
-            <div class="master-setting-title"><span>04</span><div><strong>Пригласить другого мастера</strong><small>Он получит отдельный кабинет и собственную кампанию</small></div></div>
-            <div class="master-invite-controls"><input id="master-invite-name" placeholder="Имя мастера (необязательно)"><button type="button" id="create-master-invite">Создать и скопировать ссылку</button></div>
-            <code id="master-invite-link"></code>
+          <section class="npc-section">
+            <h4>Для игры</h4>
+            <label>Заметки мастера<textarea name="dmNotes"></textarea></label>
+            <div class="npc-combat-fields">
+              <label>AC<input name="ac" type="number" min="0" /></label
+              ><label>HP<input name="hp" type="number" min="0" /></label>
+            </div>
+            <label>Пара атак<textarea name="combatAttacks"></textarea></label>
+          </section>
+          <section class="npc-section npc-publication">
+            <h4>Что знают игроки</h4>
+            <p>Открывайте досье постепенно. Закрытые блоки игрокам не отправляются.</p>
+            <label class="npc-public-all"
+              ><input name="visibleToPlayers" type="checkbox" /> Показывать всем игрокам</label
+            >
+            <div>
+              <strong>Или только выбранным персонажам</strong>
+              <div id="npc-player-access" class="lore-player-access"></div>
+            </div>
+            <fieldset id="npc-public-fields">
+              <legend>Открытые части карточки</legend>
+              <label><input type="checkbox" value="identity" /> Имя, портрет, прозвище и раса</label
+              ><label><input type="checkbox" value="status" /> Статус</label
+              ><label><input type="checkbox" value="appearance" /> Внешность</label
+              ><label><input type="checkbox" value="character" /> Характер и манера речи</label
+              ><label><input type="checkbox" value="location" /> Местонахождение</label
+              ><label><input type="checkbox" value="faction" /> Фракция</label
+              ><label><input type="checkbox" value="attitude" /> Отношение к партии</label
+              ><label><input type="checkbox" value="connections" /> Известные связи</label>
+            </fieldset>
           </section>
         </div>
-        <aside class="master-preview-column">
-          <span class="eyebrow">Живой предпросмотр</span>
-          <div class="master-preview" id="master-settings-preview">
-            <div class="master-preview-brand"><span>D20</span><div><small data-preview="brandEyebrow">Личная летопись</small><strong data-preview="brandTitle">Архив мастера</strong></div></div>
-            <div class="master-preview-campaign"><small>Текущая кампания</small><strong data-preview="campaignName">Моя кампания</strong><span data-preview="campaignChapter">Глава кампании</span></div>
-            <div class="master-preview-hero">
-              <small data-preview="heroKicker">Следующая игра</small>
-              <h3 data-preview="heroTitle">Название приключения</h3>
-              <p data-preview="heroDescription">Описание кампании и ближайшей сессии появится здесь.</p>
-            </div>
-            <div class="master-preview-footer"><span data-preview="worldTitle">Атлас мира</span><strong data-preview="displayName">Хранитель</strong></div>
-          </div>
-          <p class="master-preview-note">Предпросмотр обновляется сразу. На сайте изменения появятся после сохранения.</p>
-        </aside>
-      </div>
-    </form>
-  </dialog>
+        <div class="modal-actions">
+          <button type="button" class="delete" id="delete-npc">Удалить NPC</button
+          ><button type="button" class="ghost-button" data-close-dialog="npc-dialog">Отмена</button
+          ><button value="default" class="primary-button">Сохранить досье</button>
+        </div>
+      </form>
+    </dialog>
 
-  <div class="toast" id="toast"></div>
-  <script src="assets/js/rich-text.js"></script>
-  <script src="assets/js/core.js"></script>
-  <script src="assets/js/views.js"></script>
-  <script src="assets/js/sheets.js"></script>
-  <script src="assets/js/events.js"></script>
-  <script src="assets/js/main.js"></script>
-</body>
+    <dialog id="npc-view-dialog" class="npc-view-dialog">
+      <article id="npc-view-content"></article>
+    </dialog>
+
+    <dialog id="lore-view-dialog" class="lore-view-dialog">
+      <article id="lore-view-content"></article>
+    </dialog>
+
+    <dialog id="lore-dialog" class="lore-dialog">
+      <form method="dialog" id="lore-form">
+        <div class="lore-sheet-head">
+          <div>
+            <span class="eyebrow">Энциклопедия мира</span>
+            <h2 id="lore-sheet-heading">Новая запись</h2>
+          </div>
+          <button type="button" class="modal-close" data-close-dialog="lore-dialog">×</button>
+        </div>
+        <div class="lore-sheet-meta">
+          <label
+            >Тип записи<select name="type" id="lore-type">
+              <option value="Место">Место</option>
+              <option value="Фракция">Фракция</option>
+              <option value="Легенда">Легенда</option>
+              <option value="Персона">Персона</option>
+              <option value="Событие">Событие</option>
+              <option value="Другое">Другое</option>
+            </select></label
+          >
+          <label>Название<input name="title" required /></label>
+        </div>
+        <section class="lore-access-box">
+          <label class="lore-public-toggle"
+            ><input name="visibleToPlayers" type="checkbox" /> Показывать всем игрокам</label
+          >
+          <div>
+            <strong>Или только конкретным персонажам</strong
+            ><span>Отметьте тех, кому известна эта запись.</span>
+          </div>
+          <div id="lore-player-access" class="lore-player-access"></div>
+        </section>
+        <label class="lore-ideology" id="lore-ideology"
+          >Идеология фракции<textarea
+            name="ideology"
+            placeholder="Ценности, убеждения, цели и методы фракции..."
+          ></textarea>
+        </label>
+        <label class="lore-description"
+          >Подробное описание<textarea
+            name="text"
+            required
+            placeholder="Всё, что важно знать об этой записи..."
+          ></textarea>
+        </label>
+        <section class="lore-images-editor">
+          <div>
+            <strong>Изображения записи</strong
+            ><button type="button" class="ghost-button" id="upload-lore-image">＋ Добавить изображение</button
+            ><input
+              id="lore-image-input"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              hidden
+            />
+          </div>
+          <small class="lore-image-hint"
+            >Лучше всего подходит горизонтальное изображение 16:9, от 1200 × 675 px. Поддерживаются JPG, PNG,
+            WebP и GIF.</small
+          >
+          <div id="lore-image-list"></div>
+        </section>
+        <div class="modal-actions">
+          <button type="button" class="delete" id="delete-lore-sheet">Удалить</button
+          ><button type="button" class="ghost-button" data-close-dialog="lore-dialog">Отмена</button
+          ><button value="default" class="primary-button">Сохранить запись</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="session-dialog" class="session-dialog">
+      <form method="dialog" id="session-form">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow">Календарь кампании</span>
+            <h3 id="session-dialog-title">Новая сессия</h3>
+          </div>
+          <button type="button" class="modal-close" data-close-dialog="session-dialog">×</button>
+        </div>
+        <div class="session-form-grid">
+          <label class="wide">Название сессии<input name="title" required /></label>
+          <label>Дата<input name="date" type="date" required /></label>
+          <label>Время<input name="time" type="time" /></label>
+          <label
+            >Статус<select name="status">
+              <option value="planned">Запланирована</option>
+              <option value="completed">Сыграна</option>
+              <option value="cancelled">Отменена</option>
+            </select></label
+          >
+          <label class="wide"
+            >План и подготовка<textarea
+              name="plan"
+              placeholder="Что должно произойти, сцены, NPC, зацепки..."
+            ></textarea>
+          </label>
+          <label class="wide"
+            >Краткое содержание после сессии<textarea
+              name="summary"
+              placeholder="Необязательно. Что произошло на игре, важные решения и последствия..."
+            ></textarea>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="delete" id="delete-session">Удалить</button
+          ><button type="button" class="ghost-button" data-close-dialog="session-dialog">Отмена</button
+          ><button value="default" class="primary-button">Сохранить сессию</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="monster-dialog" class="monster-dialog">
+      <form method="dialog" id="monster-form">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow">Бестиарий мастера</span>
+            <h3 id="monster-dialog-title">Существо</h3>
+          </div>
+          <button type="button" class="modal-close" data-close-dialog="monster-dialog">×</button>
+        </div>
+        <div class="monster-form-grid">
+          <label class="wide">Название<input name="name" required /></label
+          ><label>Тип<input name="type" placeholder="Зверь, нежить..." /></label
+          ><label>Размер<input name="size" /></label><label>Мировоззрение<input name="alignment" /></label>
+          <label>Класс доспеха<input name="ac" type="number" /></label
+          ><label>Хиты<input name="hp" type="number" /></label
+          ><label>Кость хитов<input name="hitDice" /></label><label>Скорость<input name="speed" /></label>
+          <div class="monster-abilities-editor" id="monster-abilities-editor"></div>
+          <fieldset class="wide monster-saves">
+            <legend>Спасброски с преимуществом</legend>
+            <div id="monster-advantage-saves"></div>
+          </fieldset>
+          <label class="wide">Навыки<input name="skills" /></label
+          ><label>Иммунитеты к урону<textarea name="damageImmunities"></textarea></label
+          ><label>Сопротивления<textarea name="damageResistances"></textarea></label
+          ><label>Уязвимости<textarea name="damageVulnerabilities"></textarea></label
+          ><label>Иммунитеты к состояниям<textarea name="conditionImmunities"></textarea></label>
+          <label>Чувства<input name="senses" /></label
+          ><label>Пассивное восприятие<input name="passivePerception" type="number" /></label
+          ><label>Языки<input name="languages" /></label><label>Опасность CR<input name="cr" /></label
+          ><label>Опыт XP<input name="xp" type="number" /></label
+          ><label>Тег кампании<input name="campaignTag" /></label>
+          <label class="wide">Особые способности<textarea name="traits"></textarea></label>
+          <section class="wide repeatable-editor">
+            <div>
+              <strong>Действия</strong
+              ><button type="button" class="ghost-button" id="add-monster-action">＋ Действие</button>
+            </div>
+            <div id="monster-actions-editor"></div>
+          </section>
+          <label class="wide">Реакции<textarea name="reactions"></textarea></label
+          ><label class="wide">Легендарные действия<textarea name="legendaryActions"></textarea></label
+          ><label class="wide">Логово и действия логова<textarea name="lair"></textarea></label
+          ><label class="wide dm-only-field">Заметки мастера<textarea name="dmNotes"></textarea></label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="delete" id="delete-monster">Удалить</button
+          ><button type="button" class="ghost-button" data-close-dialog="monster-dialog">Отмена</button
+          ><button value="default" class="primary-button">Сохранить существо</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="shop-dialog" class="shop-dialog">
+      <form method="dialog" id="shop-form">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow">Торговая книга</span>
+            <h3 id="shop-dialog-title">Магазин</h3>
+          </div>
+          <button type="button" class="modal-close" data-close-dialog="shop-dialog">×</button>
+        </div>
+        <div class="shop-form-grid">
+          <label class="wide">Название магазина / имя торговца<input name="name" required /></label>
+          <label>Локация<select name="locationId" id="shop-location"></select></label>
+          <label
+            >Статус<select name="status">
+              <option value="open">Открыт</option>
+              <option value="closed">Закрыт</option>
+              <option value="unavailable">Недоступен</option>
+            </select></label
+          >
+          <label class="wide">Описание торговца<textarea name="description"></textarea></label>
+          <section class="wide lore-access-box">
+            <label class="lore-public-toggle"
+              ><input name="visibleToPlayers" type="checkbox" /> Показывать всем игрокам</label
+            >
+            <div><strong>Или конкретным персонажам</strong></div>
+            <div id="shop-player-access" class="lore-player-access"></div>
+          </section>
+          <section class="wide repeatable-editor">
+            <div>
+              <strong>Товары</strong
+              ><button type="button" class="ghost-button" id="add-shop-item">＋ Товар</button>
+            </div>
+            <div id="shop-items-editor"></div>
+          </section>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="delete" id="delete-shop">Удалить</button
+          ><button type="button" class="ghost-button" data-close-dialog="shop-dialog">Отмена</button
+          ><button value="default" class="primary-button">Сохранить магазин</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="master-login-dialog">
+      <form id="master-login-form">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow">Кабинет мастера</span>
+            <h3 id="master-login-title">Вход в мастерскую</h3>
+          </div>
+        </div>
+        <div class="form-grid">
+          <label class="wide"
+            >Логин мастера<input
+              name="username"
+              autocomplete="username"
+              placeholder="Для главного мастера можно оставить пустым"
+          /></label>
+          <label class="wide"
+            >Пароль<input name="password" type="password" autocomplete="current-password" required
+          /></label>
+        </div>
+        <small id="master-login-error"></small>
+        <div class="modal-actions"><button class="primary-button">Войти</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="master-register-dialog">
+      <form id="master-register-form">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow">Приглашение мастера</span>
+            <h3>Создать свой кабинет</h3>
+          </div>
+        </div>
+        <div class="form-grid">
+          <label>Ваше имя<input name="displayName" required /></label>
+          <label>Название кампании<input name="campaignName" required /></label>
+          <label>Логин<input name="username" autocomplete="username" required /></label>
+          <label
+            >Пароль<input name="password" type="password" minlength="6" autocomplete="new-password" required
+          /></label>
+        </div>
+        <small id="master-register-error"></small>
+        <div class="modal-actions"><button class="primary-button">Создать кабинет</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="master-account-dialog">
+      <form id="master-account-form" class="master-account-shell">
+        <header class="master-account-head">
+          <div>
+            <span class="eyebrow">Личный кабинет</span>
+            <h2>Мастерская кампании</h2>
+            <p>Настройте настроение, подписи и главный экран своей хроники.</p>
+          </div>
+          <div>
+            <button type="button" class="delete" id="master-logout">Выйти</button
+            ><button class="primary-button">Сохранить изменения</button
+            ><button type="button" class="modal-close" data-close-dialog="master-account-dialog">×</button>
+          </div>
+        </header>
+        <div class="master-account-layout">
+          <div class="master-settings-column">
+            <section class="master-setting-card">
+              <div class="master-setting-title">
+                <span>01</span>
+                <div><strong>Кампания и мастер</strong><small>Основные подписи кабинета</small></div>
+              </div>
+              <div class="master-setting-grid">
+                <label>Имя мастера<input name="displayName" /></label>
+                <label>Название кампании<input name="campaignName" required /></label>
+                <label>Глава / статус<input name="campaignChapter" placeholder="Глава III" /></label>
+                <label>Приветствие<input name="greeting" placeholder="Добрый вечер" /></label>
+                <label class="wide">Описание кампании<textarea name="campaignDescription"></textarea></label>
+              </div>
+            </section>
+            <section class="master-setting-card">
+              <div class="master-setting-title">
+                <span>02</span>
+                <div><strong>Облик архива</strong><small>Название, цвет и мир</small></div>
+              </div>
+              <div class="master-setting-grid">
+                <label>Название сайта<input name="brandTitle" placeholder="Архив мастера" /></label>
+                <label
+                  >Надпись над названием<input name="brandEyebrow" placeholder="Личная летопись"
+                /></label>
+                <label>Название атласа<input name="worldTitle" placeholder="Атлас мира" /></label>
+                <label class="color-setting"
+                  >Акцентный цвет<input name="accentColor" type="color" value="#d7aa5e"
+                /></label>
+              </div>
+            </section>
+            <section class="master-setting-card">
+              <div class="master-setting-title">
+                <span>03</span>
+                <div>
+                  <strong>Главный баннер</strong><small>Пустые поля подхватят ближайшую сессию</small>
+                </div>
+              </div>
+              <div class="master-setting-grid">
+                <label
+                  >Заголовок<input name="heroTitle" placeholder="Автоматически из ближайшей сессии"
+                /></label>
+                <label
+                  >Короткая подпись<input name="heroKicker" placeholder="Автоматически из ближайшей сессии"
+                /></label>
+                <label class="wide"
+                  >Фоновое изображение<input name="heroImageUrl" placeholder="https://..."
+                /></label>
+                <label class="wide"
+                  >Описание баннера<textarea
+                    name="heroDescription"
+                    placeholder="Автоматически из плана ближайшей сессии"
+                  ></textarea>
+                </label>
+              </div>
+            </section>
+            <section class="master-setting-card master-invite-card">
+              <div class="master-setting-title">
+                <span>04</span>
+                <div>
+                  <strong>Пригласить другого мастера</strong
+                  ><small>Он получит отдельный кабинет и собственную кампанию</small>
+                </div>
+              </div>
+              <div class="master-invite-controls">
+                <input id="master-invite-name" placeholder="Имя мастера (необязательно)" /><button
+                  type="button"
+                  id="create-master-invite"
+                >
+                  Создать и скопировать ссылку
+                </button>
+              </div>
+              <code id="master-invite-link"></code>
+            </section>
+          </div>
+          <aside class="master-preview-column">
+            <span class="eyebrow">Живой предпросмотр</span>
+            <div class="master-preview" id="master-settings-preview">
+              <div class="master-preview-brand">
+                <span>D20</span>
+                <div>
+                  <small data-preview="brandEyebrow">Личная летопись</small
+                  ><strong data-preview="brandTitle">Архив мастера</strong>
+                </div>
+              </div>
+              <div class="master-preview-campaign">
+                <small>Текущая кампания</small><strong data-preview="campaignName">Моя кампания</strong
+                ><span data-preview="campaignChapter">Глава кампании</span>
+              </div>
+              <div class="master-preview-hero">
+                <small data-preview="heroKicker">Следующая игра</small>
+                <h3 data-preview="heroTitle">Название приключения</h3>
+                <p data-preview="heroDescription">Описание кампании и ближайшей сессии появится здесь.</p>
+              </div>
+              <div class="master-preview-footer">
+                <span data-preview="worldTitle">Атлас мира</span
+                ><strong data-preview="displayName">Хранитель</strong>
+              </div>
+            </div>
+            <p class="master-preview-note">
+              Предпросмотр обновляется сразу. На сайте изменения появятся после сохранения.
+            </p>
+          </aside>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast"></div>
+    <script src="assets/js/rich-text.js"></script>
+    <script src="assets/js/core.js"></script>
+    <script src="assets/js/views.js"></script>
+    <script src="assets/js/sheets.js"></script>
+    <script src="assets/js/events.js"></script>
+    <script src="assets/js/main.js"></script>
+  </body>
 </html>

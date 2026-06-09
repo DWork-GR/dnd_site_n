@@ -30,18 +30,18 @@ function startServer() {
     cwd: root,
     env: process.env,
     windowsHide: true,
-    stdio: ["inherit", "pipe", "pipe"]
+    stdio: ["inherit", "pipe", "pipe"],
   });
 
-  child.stdout.on("data", chunk => {
+  child.stdout.on("data", (chunk) => {
     process.stdout.write(chunk);
     outputLog.write(chunk);
   });
-  child.stderr.on("data", chunk => {
+  child.stderr.on("data", (chunk) => {
     process.stderr.write(chunk);
     errorLog.write(chunk);
   });
-  child.on("error", error => writeStatus(`Could not start server: ${error.message}`, true));
+  child.on("error", (error) => writeStatus(`Could not start server: ${error.message}`, true));
   child.on("close", (code, signal) => {
     child = null;
     if (stopping) {
@@ -50,11 +50,17 @@ function startServer() {
       return;
     }
     if (code === 98) {
-      writeStatus("Port is already in use. Another server instance is probably running; automatic restart stopped.", true);
+      writeStatus(
+        "Port is already in use. Another server instance is probably running; automatic restart stopped.",
+        true,
+      );
       closeLogs(0);
       return;
     }
-    writeStatus(`Server exited (code ${code ?? "none"}, signal ${signal ?? "none"}). Restarting in ${restartDelay} ms.`, true);
+    writeStatus(
+      `Server exited (code ${code ?? "none"}, signal ${signal ?? "none"}). Restarting in ${restartDelay} ms.`,
+      true,
+    );
     restartTimer = setTimeout(startServer, restartDelay);
   });
 }
@@ -78,7 +84,7 @@ function stop() {
 
 process.on("SIGINT", stop);
 process.on("SIGTERM", stop);
-process.on("uncaughtException", error => {
+process.on("uncaughtException", (error) => {
   writeStatus(`Watchdog error: ${error.stack || error.message}`, true);
   stop();
 });
