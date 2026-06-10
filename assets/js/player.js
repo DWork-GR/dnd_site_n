@@ -41,6 +41,7 @@ let combatState = { active: false };
 let playerEvents = null;
 let knownLore = [];
 let knownNpcs = [];
+let playerAccount = null;
 
 // Игроковая страница получает уже отфильтрованные сервером данные.
 // Секретные поля нельзя открыть простым изменением HTML в браузере.
@@ -58,6 +59,27 @@ const markDirty = () => {
 const signed = (value) => `${value >= 0 ? "+" : ""}${value}`;
 const modifier = (score) => Math.floor((Number(score || 10) - 10) / 2);
 const proficiency = (level) => Math.ceil(Math.max(1, Number(level || 1)) / 4) + 1;
+
+function applyPlayerProfile() {
+  const settings = playerAccount?.profileSettings || {};
+  const accent = /^#[0-9a-f]{6}$/i.test(settings.accentColor || "") ? settings.accentColor : "#b88b43";
+  document.documentElement.style.setProperty("--player-accent", accent);
+  document.documentElement.style.setProperty("--gold", accent);
+  const header = $(".player-header");
+  header.style.setProperty(
+    "--player-header-image",
+    settings.headerImageUrl
+      ? `url("${String(settings.headerImageUrl).replaceAll('"', "%22")}")`
+      : "linear-gradient(135deg, #2a1714, #17110f 62%, #271713)",
+  );
+  header.classList.toggle("has-custom-image", Boolean(settings.headerImageUrl));
+  $(".player-heading .eyebrow").textContent = settings.title || "Личный архив героя";
+  $("#character-subtitle").textContent =
+    settings.motto ||
+    [character?.race, character?.className, character?.background].filter(Boolean).join(" · ") ||
+    "История героя продолжается";
+  $("#player-account-name").textContent = playerAccount?.displayName ? `Игрок · ${playerAccount.displayName}` : "";
+}
 
 async function api(url, options = {}) {
   const response = await fetch(url, {
@@ -310,6 +332,7 @@ async function receivePlayerUpdate() {
 }
 
 function render(data) {
+  playerAccount = data.account;
   character = data.character;
   spells = structuredClone(character.spells || []);
   inventoryItems = structuredClone(character.personalInventory || []);
@@ -333,9 +356,7 @@ function render(data) {
     ]),
   );
   $("#character-title").textContent = character.name || "Персонаж";
-  $("#character-subtitle").textContent =
-    [character.race, character.className, character.background].filter(Boolean).join(" · ") ||
-    "История героя продолжается";
+  applyPlayerProfile();
   $("#quick-level").textContent = Number(character.level || 1);
   $("#quick-class").textContent = character.className || "Без класса";
   $("#quick-hp").textContent = `${Number(character.hp || 0)} / ${Number(character.maxHp || 0)}`;
@@ -553,6 +574,61 @@ $("#register-form").onsubmit = async (event) => {
 $("#logout").onclick = async () => {
   await api("/api/player/logout", { method: "POST" });
   location.reload();
+};
+function updatePlayerProfilePreview() {
+  const form = $("#player-profile-form");
+  const values = Object.fromEntries(new FormData(form));
+  const preview = $("#player-profile-preview");
+  preview.querySelector('[data-profile-preview="displayName"]').textContent = values.displayName || "Имя игрока";
+  preview.querySelector('[data-profile-preview="title"]').textContent = values.title || "Личный архив героя";
+  preview.querySelector('[data-profile-preview="motto"]').textContent =
+    values.motto || "История героя продолжается";
+  preview.style.setProperty(
+    "--profile-accent",
+    /^#[0-9a-f]{6}$/i.test(values.accentColor || "") ? values.accentColor : "#b88b43",
+  );
+  preview.style.setProperty(
+    "--profile-image",
+    values.headerImageUrl
+      ? `url("${String(values.headerImageUrl).replaceAll('"', "%22")}")`
+      : "linear-gradient(135deg, #2a1714, #17110f 62%, #271713)",
+  );
+}
+$("#open-player-profile").onclick = () => {
+  const form = $("#player-profile-form");
+  const settings = playerAccount?.profileSettings || {};
+  form.elements.displayName.value = playerAccount?.displayName || "";
+  form.elements.title.value = settings.title || "";
+  form.elements.motto.value = settings.motto || "";
+  form.elements.accentColor.value = /^#[0-9a-f]{6}$/i.test(settings.accentColor || "")
+    ? settings.accentColor
+    : "#b88b43";
+  form.elements.headerImageUrl.value = settings.headerImageUrl || "";
+  $("#player-profile-status").textContent = "";
+  updatePlayerProfilePreview();
+  $("#player-profile-dialog").showModal();
+};
+$("#player-profile-form").addEventListener("input", updatePlayerProfilePreview);
+$("#player-profile-form").onsubmit = async (event) => {
+  event.preventDefault();
+  $("#player-profile-status").textContent = "Сохраняем...";
+  try {
+    const result = await api("/api/player/profile", {
+      method: "PATCH",
+      body: JSON.stringify(Object.fromEntries(new FormData(event.currentTarget))),
+    });
+    playerAccount = result.account;
+    applyPlayerProfile();
+    $("#player-profile-status").textContent = "Профиль сохранён";
+    setTimeout(() => $("#player-profile-dialog").close(), 350);
+  } catch (error) {
+    $("#player-profile-status").textContent = error.message;
+  }
+};
+$("#close-player-profile").onclick = $("#cancel-player-profile").onclick = () =>
+  $("#player-profile-dialog").close();
+$("#player-profile-dialog").onclick = (event) => {
+  if (event.target === $("#player-profile-dialog")) $("#player-profile-dialog").close();
 };
 function openPlayerLore(index) {
   const item = knownLore[index];

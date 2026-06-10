@@ -10,6 +10,7 @@
   --red: #762d27;
   --red-dark: #4b1d1a;
   --gold: #b88b43;
+  --player-accent: #b88b43;
   --line: #cdbda4;
   --shadow: #09060566;
 }
@@ -189,8 +190,11 @@ label {
   border: 1px solid #8d5a494d;
   border-radius: 14px;
   background:
-    radial-gradient(circle at 85% 10%, #a95b4933, transparent 28%),
-    linear-gradient(135deg, #2a1714, #17110f 62%, #271713);
+    radial-gradient(circle at 85% 10%, color-mix(in srgb, var(--player-accent) 24%, transparent), transparent 28%),
+    linear-gradient(100deg, #1d1210f2 15%, #17110fce 62%, #21120fe8),
+    var(--player-header-image, linear-gradient(135deg, #2a1714, #17110f 62%, #271713));
+  background-position: center;
+  background-size: cover;
   box-shadow: 0 22px 55px #0005;
 }
 .player-header:after {
@@ -211,7 +215,7 @@ label {
   place-items: center;
   overflow: hidden;
   color: #e7c17b;
-  border: 1px solid #a87845;
+  border: 1px solid var(--player-accent);
   background: #4b211c;
   box-shadow:
     inset 0 0 0 6px #1b110d,
@@ -252,6 +256,15 @@ label {
   margin: 5px 0 0;
   color: #bda99b;
   font-size: 0.75rem;
+}
+.player-account-name {
+  display: block;
+  margin-top: 5px;
+  color: var(--player-accent);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
 }
 .player-header small {
   display: inline-block;
@@ -344,8 +357,12 @@ label {
 }
 .tabs button.active {
   color: #fff8ec;
-  border-color: #a95c4f;
-  background: linear-gradient(135deg, #943f35, #62241f);
+  border-color: var(--player-accent);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--player-accent) 72%, #943f35),
+    color-mix(in srgb, var(--player-accent) 35%, #3a1714)
+  );
   box-shadow:
     inset 0 1px #ffffff25,
     0 5px 15px #2f0d0a44;
@@ -1297,6 +1314,142 @@ input:disabled {
 .player-lore-detail-text p {
   margin: 0.8rem 0;
 }
+.player-profile-dialog {
+  width: min(900px, calc(100% - 24px));
+  padding: 0;
+  overflow: hidden;
+  color: #eee4d8;
+  border: 1px solid #765b47;
+  border-radius: 14px;
+  background: #171310;
+  box-shadow: 0 35px 100px #000c;
+}
+.player-profile-dialog::backdrop {
+  background: #090604dc;
+  backdrop-filter: blur(7px);
+}
+.player-profile-dialog form {
+  max-height: 92vh;
+  overflow-y: auto;
+}
+.player-profile-dialog header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 25px 28px;
+  border-bottom: 1px solid #ffffff12;
+  background: radial-gradient(circle at top right, color-mix(in srgb, var(--player-accent) 20%, transparent), transparent 45%);
+}
+.player-profile-dialog h2 {
+  margin: 4px 0;
+  color: #fff5e8;
+  font-size: 1.8rem;
+}
+.player-profile-dialog header p {
+  margin: 0;
+  color: #a9988b;
+  font-size: 0.75rem;
+}
+.player-profile-close {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  padding: 0;
+  border-radius: 50%;
+}
+.player-profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr);
+  gap: 22px;
+  padding: 25px 28px;
+}
+.player-profile-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.player-profile-fields .wide {
+  grid-column: 1/-1;
+}
+.player-profile-fields label {
+  display: grid;
+  gap: 6px;
+  color: #cdbfb2;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.player-profile-fields input,
+.player-profile-fields textarea {
+  width: 100%;
+  color: #f0e7dc;
+  border: 1px solid #5f5045;
+  background: #211c18;
+}
+.player-profile-fields textarea {
+  min-height: 105px;
+  resize: vertical;
+}
+.player-profile-fields input[type="color"] {
+  min-height: 43px;
+  padding: 5px;
+}
+.player-profile-preview {
+  position: relative;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  padding: 24px;
+  border: 1px solid color-mix(in srgb, var(--profile-accent, #b88b43) 60%, #ffffff22);
+  border-radius: 12px;
+  background:
+    linear-gradient(0deg, #130e0ded, #1b1211a8 70%, #25171399),
+    var(--profile-image, linear-gradient(135deg, #2a1714, #17110f));
+  background-position: center;
+  background-size: cover;
+  box-shadow: inset 0 -5px 0 var(--profile-accent, #b88b43);
+}
+.player-profile-preview span {
+  color: var(--profile-accent, #b88b43);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.player-profile-preview h3 {
+  margin: 7px 0;
+  color: #fff7eb;
+  font-size: 2rem;
+}
+.player-profile-preview p {
+  margin: 0;
+  color: #d1c0b2;
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+.player-profile-preview small {
+  margin-top: 20px;
+  color: #88796e;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+}
+.player-profile-dialog footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 18px 28px;
+  border-top: 1px solid #ffffff12;
+  background: #100e0c;
+}
+.player-profile-dialog footer small {
+  margin-right: auto;
+  color: #bba99a;
+}
 .player-lore-images {
   position: relative;
   z-index: 1;
@@ -1480,6 +1633,9 @@ input:disabled {
   .header-actions {
     grid-column: 1 / -1;
   }
+  .player-profile-layout {
+    grid-template-columns: 1fr;
+  }
   .abilities {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1580,7 +1736,7 @@ input:disabled {
   }
   .header-actions {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     width: 100%;
   }
   .header-actions button {
@@ -1620,6 +1776,25 @@ input:disabled {
   }
   .player-lore-dialog blockquote {
     margin: 20px 20px 0;
+  }
+  .player-profile-dialog header,
+  .player-profile-layout,
+  .player-profile-dialog footer {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+  .player-profile-fields {
+    grid-template-columns: 1fr;
+  }
+  .player-profile-fields .wide {
+    grid-column: auto;
+  }
+  .player-profile-dialog footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .player-profile-dialog footer small {
+    margin-right: 0;
   }
 }
 @media (max-width: 430px) {

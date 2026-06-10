@@ -334,6 +334,7 @@ async function initializeDatabase() {
     ALTER TABLE master_sessions ADD COLUMN IF NOT EXISTS master_id BIGINT;
     ALTER TABLE master_sessions ADD COLUMN IF NOT EXISTS campaign_id UUID;
     ALTER TABLE player_accounts ADD COLUMN IF NOT EXISTS campaign_id UUID;
+    ALTER TABLE player_accounts ADD COLUMN IF NOT EXISTS profile_settings JSONB NOT NULL DEFAULT '{}'::jsonb;
     ALTER TABLE player_invitations ADD COLUMN IF NOT EXISTS campaign_id UUID;
     ALTER TABLE media_assets ADD COLUMN IF NOT EXISTS campaign_id UUID;
     CREATE INDEX IF NOT EXISTS player_accounts_campaign_idx ON player_accounts(campaign_id);
@@ -449,7 +450,7 @@ async function getPlayer(req) {
   const token = parseCookies(req).dnd_player_session;
   if (!token) return null;
   const result = await queryWithRetry(
-    `SELECT a.id, a.username, a.character_id, a.display_name, a.enabled, a.campaign_id
+    `SELECT a.id, a.username, a.character_id, a.display_name, a.enabled, a.campaign_id, a.profile_settings
      FROM player_sessions s JOIN player_accounts a ON a.id = s.player_id
      WHERE s.token_hash = $1 AND s.expires_at > NOW()`,
     [hashToken(token)],
@@ -1327,7 +1328,11 @@ app.get("/api/player/data", requirePlayer, async (req, res) => {
       req.player.id,
     ]);
     res.json({
-      account: { username: req.player.username, displayName: req.player.display_name },
+      account: {
+        username: req.player.username,
+        displayName: req.player.display_name,
+        profileSettings: req.player.profile_settings || {},
+      },
       character: publicCharacter(character),
       lore: (state.lore || []).filter(
         (item) =>
@@ -1350,6 +1355,27 @@ app.get("/api/player/data", requirePlayer, async (req, res) => {
         .map((shop) => ({ ...shop, visibleToPlayers: undefined, visibleToCharacterIds: undefined })),
       notes: notesResult.rows[0]?.body || "",
     });
+  } catch (error) {
+    databaseErrorResponse(res, error);
+  }
+});
+
+app.patch("/api/player/profile", requirePlayer, async (req, res) => {
+  const displayName = String(req.body?.displayName || "")
+    .trim()
+    .slice(0, 120);
+  const profileSettings = {
+    title: String(req.body?.title || "").trim().slice(0, 120),
+    motto: String(req.body?.motto || "").trim().slice(0, 240),
+    accentColor: /^#[0-9a-f]{6}$/i.test(req.body?.accentColor || "") ? req.body.accentColor : "#b88b43",
+    headerImageUrl: String(req.body?.headerImageUrl || "").trim().slice(0, 2000),
+  };
+  try {
+    await queryWithRetry(
+      "UPDATE player_accounts SET display_name = $1, profile_settings = $2, updated_at = NOW() WHERE id = $3",
+      [displayName, profileSettings, req.player.id],
+    );
+    res.json({ ok: true, account: { username: req.player.username, displayName, profileSettings } });
   } catch (error) {
     databaseErrorResponse(res, error);
   }

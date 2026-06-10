@@ -74,10 +74,12 @@
             <span class="eyebrow">Личный архив героя</span>
             <h1 id="character-title">Персонаж</h1>
             <p id="character-subtitle">История героя продолжается</p>
+            <span class="player-account-name" id="player-account-name"></span>
             <small id="sync-status">Синхронизировано</small>
           </div>
           <div class="header-actions">
-            <button id="save-character">Сохранить изменения</button
+            <button class="quiet" id="open-player-profile">Профиль</button
+            ><button id="save-character">Сохранить изменения</button
             ><button class="quiet" id="logout">Выйти</button>
           </div>
           <div class="player-quickbar">
@@ -359,6 +361,38 @@
         <button type="button" class="player-lore-close" id="close-player-npc" aria-label="Закрыть">×</button>
         <div id="player-npc-detail"></div>
       </article>
+    </dialog>
+    <dialog id="player-profile-dialog" class="player-profile-dialog">
+      <form id="player-profile-form">
+        <header>
+          <div>
+            <span class="eyebrow">Личный профиль</span>
+            <h2>Оформление кабинета</h2>
+            <p>Сделайте свою сторону хроники действительно своей.</p>
+          </div>
+          <button type="button" class="player-profile-close" id="close-player-profile" aria-label="Закрыть">×</button>
+        </header>
+        <div class="player-profile-layout">
+          <div class="player-profile-fields">
+            <label>Ваше имя<input name="displayName" maxlength="120" /></label>
+            <label>Титул / подпись<input name="title" maxlength="120" placeholder="Исследователь забытых земель" /></label>
+            <label class="wide">Девиз<textarea name="motto" maxlength="240" placeholder="Фраза, которая будет встречать вас в кабинете"></textarea></label>
+            <label>Акцентный цвет<input name="accentColor" type="color" value="#b88b43" /></label>
+            <label class="wide">Фон шапки<input name="headerImageUrl" placeholder="https://..." /></label>
+          </div>
+          <aside class="player-profile-preview" id="player-profile-preview">
+            <span data-profile-preview="title">Личный архив героя</span>
+            <h3 data-profile-preview="displayName">Имя игрока</h3>
+            <p data-profile-preview="motto">История героя продолжается</p>
+            <small>Живой предпросмотр</small>
+          </aside>
+        </div>
+        <footer>
+          <small id="player-profile-status"></small>
+          <button type="button" class="quiet" id="cancel-player-profile">Отмена</button>
+          <button>Сохранить профиль</button>
+        </footer>
+      </form>
     </dialog>
     <script src="assets/js/rich-text.js"></script>
     <script src="assets/js/player.js"></script>
