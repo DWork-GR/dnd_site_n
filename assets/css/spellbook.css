@@ -99,7 +99,7 @@
 #sheet-tab-spells .slot-card {
   padding: 10px;
   border: 1px solid #c0a67e;
-  border-top: 4px solid #79362b;
+  border-top: 4px solid var(--sheet-accent, #79362b);
   border-radius: 8px;
   background: #fff8e9;
   box-shadow: 0 2px 6px #4a2d1812;
@@ -125,7 +125,7 @@
 #sheet-tab-spells .spell-notes {
   padding: 12px;
   border: 1px solid #b78e68;
-  border-left: 5px solid #79362b;
+  border-left: 5px solid var(--sheet-accent, #79362b);
   border-radius: 8px;
   background: #fff8e9;
 }
@@ -140,10 +140,10 @@
 #sheet-tab-spells .spell-toolbar {
   margin-bottom: 16px;
   padding: 3px 0 12px;
-  border-bottom-color: #8c5b46;
+  border-bottom-color: var(--sheet-accent, #8c5b46);
 }
 #sheet-tab-spells .spell-toolbar span {
-  color: #713129;
+  color: var(--sheet-accent-dark, #713129);
   font-size: 9px;
   letter-spacing: 0.11em;
 }
@@ -159,7 +159,7 @@
 #sheet-tab-spells .spell-card {
   padding: 14px;
   border: 1px solid #bca47f;
-  border-left: 5px solid #79362b;
+  border-left: 5px solid var(--sheet-accent, #79362b);
   border-radius: 8px;
   background: #fffaf0;
   box-shadow: 0 3px 8px #4a2d1818;
@@ -176,7 +176,7 @@
   font-size: 8px;
 }
 #sheet-tab-spells .spell-name input {
-  color: #632b24;
+  color: var(--sheet-accent-dark, #632b24);
   font-size: 14px;
   font-weight: 800;
 }
@@ -200,7 +200,7 @@
   color: #fffaf0;
   border: 0;
   border-radius: 5px;
-  background: #79362b;
+  background: var(--sheet-accent-dark, #79362b);
   font-weight: 800;
 }
 #sheet-tab-spells .spell-card-view {
@@ -226,7 +226,7 @@
 }
 #sheet-tab-spells .spell-card-view h4 {
   margin: 3px 0 0;
-  color: #632b24;
+  color: var(--sheet-accent-dark, #632b24);
   font-size: 18px;
 }
 .spell-view-badges {
@@ -237,7 +237,7 @@
 }
 .spell-view-badges b {
   padding: 4px 7px;
-  color: #632b24;
+  color: var(--sheet-accent-dark, #632b24);
   border: 1px solid #d1c0a5;
   border-radius: 999px;
   background: #f6efe3;
