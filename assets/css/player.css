@@ -1969,16 +1969,22 @@ input:disabled {
 }
 
 .combat-dock {
+  --combat-red: #c4473f;
+  --combat-red-dark: #74241f;
+  --combat-gold: #d8ac61;
+  --combat-border: #705548;
   position: fixed;
   z-index: 50;
   right: 18px;
   bottom: 18px;
   width: min(420px, calc(100% - 36px));
+  min-width: 300px;
+  min-height: min(170px, calc(100vh - 16px));
   overflow: hidden;
   color: #f9eddd;
-  border: 1px solid #b47b50;
+  border: 1px solid var(--combat-border);
   border-radius: 12px;
-  background: #171310f2;
+  background: #171310f7;
   box-shadow: 0 20px 60px #000b;
   backdrop-filter: blur(14px);
 }
@@ -1988,12 +1994,14 @@ input:disabled {
   justify-content: space-between;
   gap: 10px;
   padding: 12px 14px;
-  border-bottom: 1px solid #76533d;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--player-accent) 28%, #241411),
-    var(--player-accent)
-  );
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  border-bottom: 1px solid var(--combat-border);
+  background: linear-gradient(90deg, #3f1d1a, var(--combat-red-dark));
+}
+.combat-dock.dragging header {
+  cursor: grabbing;
 }
 .combat-dock header div {
   min-width: 0;
@@ -2001,7 +2009,7 @@ input:disabled {
   gap: 2px;
 }
 .combat-dock header span {
-  color: var(--player-accent);
+  color: var(--combat-gold);
   font-size: 0.64rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -2017,17 +2025,47 @@ input:disabled {
   min-width: 34px;
   min-height: 30px;
   padding: 2px 8px;
+  color: #f9eddd;
+  border-color: #8b6550;
+  background: #2b211c;
 }
 .combat-dock-body {
+  height: calc(100% - 59px);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   padding: 10px;
+  overflow: auto;
 }
 .combat-dock.collapsed .combat-dock-body {
   display: none;
 }
+.combat-dock.collapsed {
+  min-height: 0 !important;
+  height: auto !important;
+}
+.combat-dock.collapsed .combat-resize-handle {
+  display: none;
+}
+.combat-resize-handle {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 18px;
+  height: 18px;
+  cursor: nwse-resize;
+  touch-action: none;
+  background:
+    linear-gradient(135deg, transparent 0 48%, #a88a7355 49% 56%, transparent 57%),
+    linear-gradient(135deg, transparent 0 68%, #a88a7388 69% 76%, transparent 77%);
+}
 .combat-order {
+  min-height: 80px;
   display: grid;
+  flex: 1 1 auto;
+  align-content: start;
   gap: 5px;
-  max-height: 260px;
+  max-height: none;
   overflow-y: auto;
 }
 .combat-order article {
@@ -2042,12 +2080,12 @@ input:disabled {
   background: #25201c;
 }
 .combat-order article.active {
-  border-left-color: var(--player-accent);
-  background: #3b2e21;
+  border-left-color: var(--combat-gold);
+  background: #392b21;
   box-shadow: inset 0 0 18px #d19a4430;
 }
 .combat-order article.self {
-  border-color: var(--player-accent);
+  border-color: var(--combat-gold);
 }
 .combat-order b {
   min-width: 0;
@@ -2058,7 +2096,7 @@ input:disabled {
   white-space: nowrap;
 }
 .combat-order article > span {
-  color: var(--player-accent);
+  color: var(--combat-gold);
   font-size: 0.72rem;
   font-weight: 800;
   text-align: right;
@@ -2073,11 +2111,7 @@ input:disabled {
   height: 100%;
   display: block;
   border-radius: inherit;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--player-accent) 58%, #2d1613),
-    color-mix(in srgb, var(--player-accent) 85%, #fff0df)
-  );
+  background: linear-gradient(90deg, var(--combat-red-dark), var(--combat-red));
   transition: width 0.25s;
 }
 .combat-order small {
@@ -2115,7 +2149,7 @@ input:disabled {
   margin-top: 9px;
   padding: 11px;
   border: 1px solid #58483c;
-  border-left: 4px solid var(--player-accent);
+  border-left: 4px solid var(--combat-gold);
   border-radius: 7px;
   background: #201a17;
 }
@@ -2167,12 +2201,14 @@ input:disabled {
 .end-player-turn {
   width: 100%;
   margin-top: 9px;
+  color: #fff8e9;
+  border-color: #a17a41;
   background: linear-gradient(#a36731, #75451f);
 }
 .player-death-saves {
   margin-top: 9px;
   padding: 10px;
-  border: 1px solid var(--player-accent);
+  border: 1px solid var(--combat-red);
   border-radius: 7px;
   background: #4a211e;
 }
@@ -2196,11 +2232,22 @@ input:disabled {
   padding: 6px;
   font-size: 0.7rem;
 }
+.player-death-saves button:not(.danger) {
+  color: #eff7ed;
+  border-color: #567c58;
+  background: linear-gradient(#426c47, #294b2e);
+}
+.player-death-saves button.danger {
+  color: #fff0ed;
+  border-color: #a44d46;
+  background: linear-gradient(#8f3933, #57231f);
+}
 @media (max-width: 620px) {
   .combat-dock {
     right: 8px;
     bottom: 8px;
     width: calc(100% - 16px);
+    min-width: 0;
   }
 }
 .player-derived-bar {

@@ -42,6 +42,7 @@ let playerEvents = null;
 let knownLore = [];
 let knownNpcs = [];
 let playerAccount = null;
+const combatDockStorageKey = "dnd-player-combat-dock";
 
 // Игроковая страница получает уже отфильтрованные сервером данные.
 // Секретные поля нельзя открыть простым изменением HTML в браузере.
@@ -59,6 +60,52 @@ const markDirty = () => {
 const signed = (value) => `${value >= 0 ? "+" : ""}${value}`;
 const modifier = (score) => Math.floor((Number(score || 10) - 10) / 2);
 const proficiency = (level) => Math.ceil(Math.max(1, Number(level || 1)) / 4) + 1;
+
+function clampCombatDock(save = false) {
+  const dock = $("#combat-dock");
+  if (!dock || dock.classList.contains("hidden")) return;
+  const margin = 8;
+  const maxWidth = Math.max(160, window.innerWidth - margin * 2);
+  const maxHeight = Math.max(100, window.innerHeight - margin * 2);
+  const minWidth = Math.min(300, maxWidth);
+  const minHeight = Math.min(170, maxHeight);
+  const width = Math.min(Math.max(minWidth, dock.offsetWidth), maxWidth);
+  const height = dock.classList.contains("collapsed")
+    ? dock.offsetHeight
+    : Math.min(Math.max(minHeight, dock.offsetHeight), maxHeight);
+  const left = Math.min(Math.max(margin, dock.offsetLeft), Math.max(margin, window.innerWidth - width - margin));
+  const top = Math.min(Math.max(margin, dock.offsetTop), Math.max(margin, window.innerHeight - height - margin));
+  Object.assign(dock.style, {
+    left: `${left}px`,
+    top: `${top}px`,
+    right: "auto",
+    bottom: "auto",
+    width: `${width}px`,
+    ...(dock.classList.contains("collapsed") ? {} : { height: `${height}px` }),
+  });
+  if (save)
+    localStorage.setItem(
+      combatDockStorageKey,
+      JSON.stringify({ left, top, width, height: dock.classList.contains("collapsed") ? null : height }),
+    );
+}
+
+function restoreCombatDock() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(combatDockStorageKey));
+    if (!saved) return;
+    const dock = $("#combat-dock");
+    Object.assign(dock.style, {
+      left: `${Number(saved.left) || 8}px`,
+      top: `${Number(saved.top) || 8}px`,
+      right: "auto",
+      bottom: "auto",
+      width: `${Number(saved.width) || 420}px`,
+      ...(saved.height ? { height: `${Number(saved.height)}px` } : {}),
+    });
+  } catch {}
+  clampCombatDock();
+}
 
 function applyPlayerProfile() {
   const settings = playerAccount?.profileSettings || {};
@@ -276,6 +323,10 @@ function renderCombat(combat) {
     if (input) input.disabled = true;
   });
   if (!combatState.active) return;
+  if (!dock.dataset.positionReady) {
+    dock.dataset.positionReady = "true";
+    restoreCombatDock();
+  }
   const self = combatState.participants.find((item) => item.isSelf);
   const current = combatState.participants.find((item) => item.isCurrent);
   if (self) {
@@ -923,7 +974,48 @@ $("#heal-with-hit-die").onclick = async () => {
 $("#combat-collapse").onclick = () => {
   $("#combat-dock").classList.toggle("collapsed");
   $("#combat-collapse").textContent = $("#combat-dock").classList.contains("collapsed") ? "+" : "−";
+  clampCombatDock(true);
 };
+(() => {
+  const dock = $("#combat-dock");
+  const header = dock.querySelector("header");
+  const resizeHandle = $("#combat-resize-handle");
+  let action = null;
+  const move = (event) => {
+    if (!action) return;
+    if (action.type === "drag") {
+      dock.style.left = `${action.left + event.clientX - action.x}px`;
+      dock.style.top = `${action.top + event.clientY - action.y}px`;
+    } else {
+      dock.style.width = `${action.width + event.clientX - action.x}px`;
+      dock.style.height = `${action.height + event.clientY - action.y}px`;
+    }
+    clampCombatDock();
+  };
+  const stop = () => {
+    if (!action) return;
+    action = null;
+    dock.classList.remove("dragging");
+    clampCombatDock(true);
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", stop);
+    window.removeEventListener("pointercancel", stop);
+  };
+  const start = (event, type) => {
+    if (event.button !== 0 || (type === "drag" && event.target.closest("button"))) return;
+    event.preventDefault();
+    const rect = dock.getBoundingClientRect();
+    action = { type, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+    dock.classList.toggle("dragging", type === "drag");
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+  };
+  header.addEventListener("pointerdown", (event) => start(event, "drag"));
+  resizeHandle.addEventListener("pointerdown", (event) => start(event, "resize"));
+  window.addEventListener("resize", () => clampCombatDock(true));
+  window.addEventListener("blur", stop);
+})();
 $("#end-player-turn").onclick = async () => {
   try {
     renderCombat(await api("/api/player/combat/end-turn", { method: "POST", body: "{}" }));
