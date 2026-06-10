@@ -130,6 +130,9 @@ window.DndApp = (() => {
     d.combat.round ||= 1;
     d.combat.turnIndex ||= 0;
     d.combat.participants ||= [];
+    d.combat.participants.forEach((participant) => {
+      participant.conditions ||= [];
+    });
     d.masterNotes ||= [];
     d.packs ||= [];
     d.noteSections ||= [];

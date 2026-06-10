@@ -583,6 +583,17 @@ function sanitizePlayerCharacterUpdate(body) {
   return update;
 }
 
+function tickCombatConditions(combat, unit, participantIndex = -1) {
+  (combat?.participants || []).forEach((participant, index) => {
+    if (unit === "turn" && index !== participantIndex) return;
+    participant.conditions = (participant.conditions || [])
+      .map((condition) =>
+        condition.unit === unit ? { ...condition, remaining: Number(condition.remaining || 1) - 1 } : condition,
+      )
+      .filter((condition) => Number(condition.remaining || 0) > 0);
+  });
+}
+
 function publicCombatForPlayer(state, characterId) {
   const combat = state?.combat;
   if (!combat?.active) return { active: false };
@@ -598,6 +609,14 @@ function publicCombatForPlayer(state, characterId) {
       maxHp: Number(participant.maxHp || 0),
       isCurrent: index === Number(combat.turnIndex || 0),
       isSelf: participant.characterId === characterId,
+      conditions: (participant.conditions || []).slice(0, 30).map((condition) => ({
+        id: String(condition.id || ""),
+        name: String(condition.name || "").slice(0, 80),
+        icon: String(condition.icon || "!").slice(0, 8),
+        color: /^#[0-9a-f]{6}$/i.test(condition.color || "") ? condition.color : "#b84c43",
+        remaining: Math.max(1, Number(condition.remaining || 1)),
+        unit: condition.unit === "turn" ? "turn" : "round",
+      })),
       deathSuccesses:
         participant.characterId === characterId ? Number(participant.deathSuccesses || 0) : undefined,
       deathFailures:
@@ -1398,10 +1417,12 @@ app.post("/api/player/combat/end-turn", requirePlayer, async (req, res) => {
         error.status = 403;
         throw error;
       }
+      tickCombatConditions(state.combat, "turn", state.combat.turnIndex);
       state.combat.turnIndex++;
       if (state.combat.turnIndex >= state.combat.participants.length) {
         state.combat.turnIndex = 0;
         state.combat.round = Number(state.combat.round || 1) + 1;
+        tickCombatConditions(state.combat, "round");
       }
       return publicCombatForPlayer(state, characterId);
     });

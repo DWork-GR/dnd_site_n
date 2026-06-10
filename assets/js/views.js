@@ -325,10 +325,11 @@ Object.assign(DndApp, {
           .map(
             (item, i) => `<div class="combat-master-row ${i === combat.turnIndex ? "active" : ""}">
           <b>${i + 1}</b>
-          <span>${this.escapeHtml(item.name)}${item.characterId && item.hp === 0 ? `<small> Спасы: ${item.deathSuccesses || 0}✓ ${item.deathFailures || 0}✕</small>` : ""}</span>
+          <span>${this.escapeHtml(item.name)}${item.characterId && item.hp === 0 ? `<small> Спасы: ${item.deathSuccesses || 0}✓ ${item.deathFailures || 0}✕</small>` : ""}<span class="combat-condition-list">${(item.conditions || []).map((condition) => `<button type="button" class="combat-condition-chip" style="--condition-color:${this.escapeHtml(condition.color)}" data-remove-condition="${i}:${condition.id}" title="Удалить состояние"><i>${this.escapeHtml(condition.icon)}</i>${this.escapeHtml(condition.name)}<small>${condition.remaining} ${condition.unit === "turn" ? "ход." : "раунд."}</small></button>`).join("")}</span></span>
           <label>Иниц.<input type="number" value="${item.initiative}" data-combat-init="${i}"></label>
           <label>HP<input type="number" value="${item.hp}" data-combat-hp="${i}"></label>
           <label>Макс.<input type="number" value="${item.maxHp}" data-combat-max-hp="${i}"></label>
+          <button type="button" class="condition-add-button" data-add-condition="${i}" title="Добавить состояние">＋◉</button>
           <button class="delete" data-delete-combat="${i}">×</button>
         </div>`,
           )

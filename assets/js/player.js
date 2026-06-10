@@ -302,8 +302,17 @@ function renderCombat(combat) {
       return `<article class="${item.isCurrent ? "active" : ""} ${item.isSelf ? "self" : ""}">
       <b>${escapeHtml(item.name)}</b><span>${item.initiative}</span>
       <div class="combat-hp"><i style="width:${percent}%"></i></div><small>${item.hp} / ${item.maxHp} HP</small>
+      ${item.conditions?.length ? `<div class="player-combat-conditions">${item.conditions.map((condition) => `<span style="--condition-color:${escapeHtml(condition.color)}" title="${escapeHtml(condition.name)}"><i>${escapeHtml(condition.icon)}</i>${escapeHtml(condition.name)} <small>${condition.remaining}${condition.unit === "turn" ? "х" : "р"}</small></span>`).join("")}</div>` : ""}
     </article>`;
     })
+    .join("");
+  const selfConditions = self?.conditions || [];
+  $("#player-condition-panel").classList.toggle("hidden", !selfConditions.length);
+  $("#player-conditions").innerHTML = selfConditions
+    .map(
+      (condition) =>
+        `<article style="--condition-color:${escapeHtml(condition.color)}"><i>${escapeHtml(condition.icon)}</i><div><strong>${escapeHtml(condition.name)}</strong><small>Осталось: ${condition.remaining} ${condition.unit === "turn" ? "ход." : "раунд."}</small></div></article>`,
+    )
     .join("");
   $("#end-player-turn").classList.toggle("hidden", !current?.isSelf);
   $("#player-death-saves").classList.toggle("hidden", !self || self.hp > 0);

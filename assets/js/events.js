@@ -2,6 +2,16 @@
   const A = DndApp,
     $ = A.$,
     $$ = A.$$;
+  const tickConditions = (participants, unit, participantIndex = -1) => {
+    participants.forEach((participant, index) => {
+      if (unit === "turn" && index !== participantIndex) return;
+      participant.conditions = (participant.conditions || [])
+        .map((condition) =>
+          condition.unit === unit ? { ...condition, remaining: Number(condition.remaining || 1) - 1 } : condition,
+        )
+        .filter((condition) => Number(condition.remaining || 0) > 0);
+    });
+  };
 
   // Делегирование кликов позволяет обрабатывать динамически созданные элементы по data-* атрибутам.
   document.addEventListener("click", (e) => {
@@ -73,6 +83,25 @@
       const index = +combat.dataset.deleteCombat;
       A.data.combat.participants.splice(index, 1);
       if (A.data.combat.turnIndex >= A.data.combat.participants.length) A.data.combat.turnIndex = 0;
+      A.save();
+      A.renderInitiative();
+    }
+    const addCondition = e.target.closest("[data-add-condition]");
+    if (addCondition) {
+      A.conditionParticipantIndex = Number(addCondition.dataset.addCondition);
+      const participant = A.data.combat.participants[A.conditionParticipantIndex];
+      $("#condition-dialog-title").textContent = `Состояние · ${participant?.name || "участник"}`;
+      $("#condition-form").reset();
+      $("#condition-form").elements.color.value = "#b84c43";
+      $("#condition-form").elements.duration.value = 1;
+      $("#condition-dialog").showModal();
+      $("#condition-form").dispatchEvent(new Event("input"));
+    }
+    const removeCondition = e.target.closest("[data-remove-condition]");
+    if (removeCondition) {
+      const [participantIndex, conditionId] = removeCondition.dataset.removeCondition.split(":");
+      const participant = A.data.combat.participants[Number(participantIndex)];
+      participant.conditions = (participant.conditions || []).filter((condition) => condition.id !== conditionId);
       A.save();
       A.renderInitiative();
     }
@@ -272,6 +301,7 @@
         maxHp: hp,
         deathSuccesses: 0,
         deathFailures: 0,
+        conditions: [],
       });
       A.data.combat.participants.sort((a, b) => b.initiative - a.initiative);
       A.data.combat.turnIndex = 0;
@@ -283,6 +313,35 @@
     A.data.initiative.sort((a, b) => b.value - a.value);
     A.save();
     A.renderInitiative();
+  };
+  $("#condition-form").oninput = (event) => {
+    const form = event.currentTarget;
+    const name = form.elements.name.value.trim() || "Новое состояние";
+    const duration = Math.max(1, Number(form.elements.duration.value || 1));
+    const unit = form.elements.unit.value;
+    $("#condition-preview-icon").textContent = form.elements.icon.value;
+    $("#condition-preview-name").textContent = name;
+    $("#condition-preview-duration").textContent = `${duration} ${unit === "turn" ? "ход." : "раунд."}`;
+    $(".condition-preview").style.setProperty("--condition-color", form.elements.color.value);
+  };
+  $("#condition-form").onsubmit = (event) => {
+    event.preventDefault();
+    const participant = A.data.combat.participants[A.conditionParticipantIndex];
+    if (!participant) return $("#condition-dialog").close();
+    const form = event.currentTarget;
+    participant.conditions ||= [];
+    participant.conditions.push({
+      id: crypto.randomUUID(),
+      name: form.elements.name.value.trim(),
+      icon: form.elements.icon.value,
+      color: form.elements.color.value,
+      remaining: Math.max(1, Math.min(99, Number(form.elements.duration.value || 1))),
+      unit: form.elements.unit.value === "turn" ? "turn" : "round",
+    });
+    A.save();
+    A.renderInitiative();
+    $("#condition-dialog").close();
+    A.toast("Состояние добавлено");
   };
   $("#initiative-list").onchange = (e) => {
     if (e.target.dataset.init !== undefined) {
@@ -352,6 +411,7 @@
             maxHp: Number(c?.maxHp ?? c?.hp ?? 1),
             deathSuccesses: Number(c?.deathSuccesses || 0),
             deathFailures: Number(c?.deathFailures || 0),
+            conditions: [],
           };
         })
         .sort((a, b) => b.initiative - a.initiative),
@@ -363,10 +423,12 @@
   $("#next-combat-turn").onclick = () => {
     const c = A.data.combat;
     if (!c.active || !c.participants.length) return;
+    tickConditions(c.participants, "turn", c.turnIndex);
     c.turnIndex++;
     if (c.turnIndex >= c.participants.length) {
       c.turnIndex = 0;
       c.round++;
+      tickConditions(c.participants, "round");
     }
     A.save();
     A.renderInitiative();

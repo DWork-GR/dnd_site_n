@@ -457,6 +457,49 @@
         </div>
       </form>
     </dialog>
+    <dialog id="condition-dialog" class="condition-dialog">
+      <form id="condition-form">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow">Трекер состояний</span>
+            <h3 id="condition-dialog-title">Добавить состояние</h3>
+          </div>
+          <button type="button" class="modal-close" data-close-dialog="condition-dialog">×</button>
+        </div>
+        <div class="condition-form-grid">
+          <label>Название<input name="name" required maxlength="80" placeholder="Отравлен" /></label>
+          <label
+            >Иконка<select name="icon">
+              <option value="☠">☠ Яд</option>
+              <option value="🔥">🔥 Огонь</option>
+              <option value="❄">❄ Холод</option>
+              <option value="⚡">⚡ Шок</option>
+              <option value="✦">✦ Магия</option>
+              <option value="◉">◉ Метка</option>
+              <option value="⛓">⛓ Скован</option>
+              <option value="💤">💤 Сон</option>
+              <option value="!">! Другое</option>
+            </select></label
+          >
+          <label>Цвет<input name="color" type="color" value="#b84c43" /></label>
+          <label>Длительность<input name="duration" type="number" min="1" max="99" value="1" required /></label>
+          <label class="wide"
+            >Считать в<select name="unit">
+              <option value="round">Раундах</option>
+              <option value="turn">Ходах участника</option>
+            </select></label
+          >
+        </div>
+        <div class="condition-preview">
+          <span id="condition-preview-icon">☠</span>
+          <div><strong id="condition-preview-name">Отравлен</strong><small id="condition-preview-duration">1 раунд</small></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="ghost-button" data-close-dialog="condition-dialog">Отмена</button>
+          <button class="primary-button">Добавить состояние</button>
+        </div>
+      </form>
+    </dialog>
 
     <dialog id="sheet-dialog" class="sheet-dialog">
       <form method="dialog" id="sheet-form">

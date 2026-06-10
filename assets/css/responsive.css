@@ -193,6 +193,18 @@
   .lore-description textarea {
     min-height: 350px;
   }
+  .combat-master-row {
+    grid-template-columns: 34px minmax(0, 1fr) 42px 28px;
+  }
+  .combat-master-row label {
+    grid-column: span 2;
+  }
+  .condition-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .condition-form-grid .wide {
+    grid-column: auto;
+  }
   .master-setting-summary {
     grid-template-columns: minmax(0, 1fr);
   }

@@ -1940,7 +1940,7 @@ textarea {
 }
 .combat-master-row {
   display: grid;
-  grid-template-columns: 42px minmax(140px, 1fr) 78px 78px 78px 28px;
+  grid-template-columns: 42px minmax(140px, 1fr) 78px 78px 78px 42px 28px;
   gap: 10px;
   align-items: center;
   padding: 12px 10px;
@@ -1957,8 +1957,48 @@ textarea {
   text-align: center;
 }
 .combat-master-row > span {
+  min-width: 0;
   overflow-wrap: anywhere;
   font: 700 19px "Cormorant Garamond";
+}
+.combat-condition-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+.combat-condition-chip {
+  min-height: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 7px;
+  color: color-mix(in srgb, var(--condition-color) 35%, #fff);
+  border: 1px solid color-mix(in srgb, var(--condition-color) 70%, #ffffff22);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--condition-color) 20%, #171513);
+  font: 700 9px Montserrat;
+}
+.combat-condition-chip:hover {
+  border-color: var(--condition-color);
+  background: color-mix(in srgb, var(--condition-color) 35%, #171513);
+}
+.combat-condition-chip i {
+  color: var(--condition-color);
+  font-style: normal;
+}
+.combat-condition-chip small {
+  color: var(--muted);
+  font-size: 7px;
+}
+.condition-add-button {
+  width: 38px;
+  min-height: 34px;
+  padding: 0;
+  color: var(--gold);
+  border: 1px solid var(--gold-border);
+  border-radius: 5px;
+  background: var(--gold-soft);
 }
 .combat-master-row label {
   color: var(--muted);
@@ -1980,6 +2020,54 @@ textarea {
 }
 .combat-master-actions .primary-button {
   grid-column: 1/-1;
+}
+.condition-dialog {
+  width: min(560px, calc(100% - 24px));
+}
+.condition-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+.condition-form-grid .wide {
+  grid-column: 1/-1;
+}
+.condition-form-grid label {
+  color: var(--muted);
+  font-size: 9px;
+}
+.condition-preview {
+  --condition-color: #b84c43;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 14px;
+  color: color-mix(in srgb, var(--condition-color) 35%, #fff);
+  border: 1px solid color-mix(in srgb, var(--condition-color) 70%, #ffffff22);
+  border-left: 5px solid var(--condition-color);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--condition-color) 16%, #171513);
+}
+.condition-preview > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  border-radius: 50%;
+  background: var(--condition-color);
+  font-size: 20px;
+}
+.condition-preview strong,
+.condition-preview small {
+  display: block;
+}
+.condition-preview small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 8px;
 }
 
 /* Campaign accent palette */
