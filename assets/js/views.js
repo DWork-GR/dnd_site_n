@@ -151,12 +151,29 @@ Object.assign(DndApp, {
 
   async renderPlayerRoster() {
     try {
-      const [accountsResponse, invitationsResponse] = await Promise.all([
+      const [accountsResponse, invitationsResponse, sharedInvitationResponse] = await Promise.all([
         fetch("/api/master/player-accounts"),
         fetch("/api/master/player-invitations"),
+        fetch("/api/master/shared-player-invitation"),
       ]);
       const accounts = await accountsResponse.json();
       const invitations = await invitationsResponse.json();
+      const sharedInvitation = sharedInvitationResponse.ok ? await sharedInvitationResponse.json() : null;
+      const sharedBox = this.$("#shared-player-invite-result");
+      const createSharedButton = this.$("#create-shared-player-invite");
+      const revokeSharedButton = this.$("#revoke-shared-player-invite");
+      if (sharedInvitation?.token) {
+        const sharedUrl = `${location.origin}/player.html?invite=${encodeURIComponent(sharedInvitation.token)}`;
+        sharedBox.innerHTML = `<code>${this.escapeHtml(sharedUrl)}</code><button type="button" data-copy-shared-invite="${this.escapeHtml(sharedUrl)}">Копировать</button>`;
+        sharedBox.classList.remove("hidden");
+        createSharedButton.textContent = "Создать новую ссылку";
+        revokeSharedButton.classList.remove("hidden");
+      } else {
+        sharedBox.innerHTML = "";
+        sharedBox.classList.add("hidden");
+        createSharedButton.textContent = "Создать общую ссылку";
+        revokeSharedButton.classList.add("hidden");
+      }
       this.$("#player-account-roster").innerHTML =
         `<strong>Зарегистрированные игроки · ${accounts.length}</strong>` +
         accounts

@@ -397,8 +397,44 @@
 .player-invite-form input {
   margin: 0;
 }
+.shared-player-invite {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(215, 170, 94, 0.35);
+  border-radius: 7px;
+  background: linear-gradient(135deg, rgba(215, 170, 94, 0.08), rgba(21, 20, 18, 0.45));
+}
+.shared-player-invite > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+.shared-player-invite small {
+  color: var(--muted);
+}
+.shared-player-invite-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.player-invite-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.player-invite-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
 .player-invite-result {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
   padding: 10px;

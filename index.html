@@ -163,6 +163,23 @@
               <h3>Игроки и приглашения</h3>
             </div>
           </div>
+          <div class="shared-player-invite">
+            <div>
+              <strong>Общая ссылка кампании</strong>
+              <small
+                >Отправьте её в общий чат. Каждый игрок зарегистрируется сам и получит отдельный новый
+                лист.</small
+              >
+            </div>
+            <div class="shared-player-invite-actions">
+              <button type="button" class="primary-button" id="create-shared-player-invite">
+                Создать общую ссылку
+              </button>
+              <button type="button" id="revoke-shared-player-invite" class="hidden">Отозвать ссылку</button>
+            </div>
+            <div id="shared-player-invite-result" class="player-invite-result hidden"></div>
+          </div>
+          <div class="player-invite-divider"><span>Одноразовое приглашение</span></div>
           <form id="player-invite-form" class="player-invite-form">
             <input id="player-invite-name" placeholder="Имя игрока (необязательно)" />
             <button class="primary-button">Создать ссылку-приглашение</button>

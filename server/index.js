@@ -336,9 +336,12 @@ async function initializeDatabase() {
     ALTER TABLE player_accounts ADD COLUMN IF NOT EXISTS campaign_id UUID;
     ALTER TABLE player_accounts ADD COLUMN IF NOT EXISTS profile_settings JSONB NOT NULL DEFAULT '{}'::jsonb;
     ALTER TABLE player_invitations ADD COLUMN IF NOT EXISTS campaign_id UUID;
+    ALTER TABLE player_invitations ADD COLUMN IF NOT EXISTS reusable BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE player_invitations ADD COLUMN IF NOT EXISTS public_token TEXT;
     ALTER TABLE media_assets ADD COLUMN IF NOT EXISTS campaign_id UUID;
     CREATE INDEX IF NOT EXISTS player_accounts_campaign_idx ON player_accounts(campaign_id);
     CREATE INDEX IF NOT EXISTS player_invitations_campaign_idx ON player_invitations(campaign_id);
+    CREATE UNIQUE INDEX IF NOT EXISTS player_invitations_shared_campaign_idx ON player_invitations(campaign_id) WHERE reusable = TRUE;
     CREATE INDEX IF NOT EXISTS media_assets_campaign_idx ON media_assets(campaign_id);
     CREATE INDEX IF NOT EXISTS campaign_state_backups_campaign_idx ON campaign_state_backups(campaign_id, created_at DESC);
   `,
@@ -970,10 +973,10 @@ app.post("/api/master/register", loginRateLimit, async (req, res) => {
   }
 });
 
-app.get("/api/master/player-invitations", requireMaster, async (_req, res) => {
+app.get("/api/master/player-invitations", requireMaster, async (req, res) => {
   try {
     const result = await queryWithRetry(
-      "SELECT token_hash AS id, display_name, expires_at, created_at FROM player_invitations WHERE campaign_id = $1 AND expires_at > NOW() ORDER BY created_at DESC",
+      "SELECT token_hash AS id, display_name, expires_at, created_at FROM player_invitations WHERE campaign_id = $1 AND reusable = FALSE AND expires_at > NOW() ORDER BY created_at DESC",
       [req.master.campaign_id],
     );
     res.json(result.rows);
@@ -994,6 +997,55 @@ app.post("/api/master/player-invitations", requireMaster, async (req, res) => {
       [hashToken(token), displayName, expiresAt, req.master.campaign_id],
     );
     res.json({ token, displayName, expiresAt });
+  } catch (error) {
+    databaseErrorResponse(res, error);
+  }
+});
+
+app.get("/api/master/shared-player-invitation", requireMaster, async (req, res) => {
+  try {
+    const result = await queryWithRetry(
+      "SELECT public_token AS token, created_at FROM player_invitations WHERE campaign_id = $1 AND reusable = TRUE AND expires_at > NOW() LIMIT 1",
+      [req.master.campaign_id],
+    );
+    res.json(result.rows[0] || null);
+  } catch (error) {
+    databaseErrorResponse(res, error);
+  }
+});
+
+app.post("/api/master/shared-player-invitation", requireMaster, async (req, res) => {
+  const token = crypto.randomBytes(24).toString("base64url");
+  const expiresAt = new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000);
+  let client;
+  try {
+    client = await connectWithRetry();
+    await client.query("BEGIN");
+    await client.query("DELETE FROM player_invitations WHERE campaign_id = $1 AND reusable = TRUE", [
+      req.master.campaign_id,
+    ]);
+    await client.query(
+      "INSERT INTO player_invitations (token_hash, display_name, expires_at, campaign_id, reusable, public_token) VALUES ($1, '', $2, $3, TRUE, $4)",
+      [hashToken(token), expiresAt, req.master.campaign_id, token],
+    );
+    await client.query("COMMIT");
+    res.json({ token });
+  } catch (error) {
+    try {
+      if (client) await client.query("ROLLBACK");
+    } catch {}
+    databaseErrorResponse(res, error);
+  } finally {
+    if (client) client.release();
+  }
+});
+
+app.delete("/api/master/shared-player-invitation", requireMaster, async (req, res) => {
+  try {
+    await queryWithRetry("DELETE FROM player_invitations WHERE campaign_id = $1 AND reusable = TRUE", [
+      req.master.campaign_id,
+    ]);
+    res.json({ ok: true });
   } catch (error) {
     databaseErrorResponse(res, error);
   }
@@ -1301,7 +1353,8 @@ app.post("/api/player/register", loginRateLimit, async (req, res) => {
       state,
       invitation.campaign_id,
     ]);
-    await client.query("DELETE FROM player_invitations WHERE token_hash = $1", [hashToken(token)]);
+    if (invitation.reusable !== true)
+      await client.query("DELETE FROM player_invitations WHERE token_hash = $1", [hashToken(token)]);
     const sessionToken = crypto.randomBytes(32).toString("base64url");
     await client.query(
       "INSERT INTO player_sessions (token_hash, player_id, expires_at) VALUES ($1, $2, $3)",

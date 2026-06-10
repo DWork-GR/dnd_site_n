@@ -805,6 +805,32 @@
   $("#sheet-form").addEventListener("change", () => A.updateSheetCalculations());
   $("#save-player-access").onclick = () => A.savePlayerAccess();
   $("#delete-player-access").onclick = () => A.deletePlayerAccess();
+  $("#create-shared-player-invite").onclick = async () => {
+    if (
+      !$("#revoke-shared-player-invite").classList.contains("hidden") &&
+      !confirm("Создать новую общую ссылку? Старая ссылка перестанет работать.")
+    )
+      return;
+    const response = await fetch("/api/master/shared-player-invitation", { method: "POST" });
+    const result = await response.json();
+    if (!response.ok) return A.toast(result.error || "Не удалось создать общую ссылку");
+    await A.renderPlayerRoster();
+    A.toast("Общая ссылка готова");
+  };
+  $("#revoke-shared-player-invite").onclick = async () => {
+    if (!confirm("Отозвать общую ссылку? Новые игроки больше не смогут зарегистрироваться по ней.")) return;
+    const response = await fetch("/api/master/shared-player-invitation", { method: "DELETE" });
+    const result = await response.json();
+    if (!response.ok) return A.toast(result.error || "Не удалось отозвать общую ссылку");
+    await A.renderPlayerRoster();
+    A.toast("Общая ссылка отозвана");
+  };
+  $("#shared-player-invite-result").onclick = async (e) => {
+    const url = e.target.dataset.copySharedInvite;
+    if (!url) return;
+    await navigator.clipboard.writeText(url);
+    A.toast("Ссылка скопирована");
+  };
   $("#player-invite-form").onsubmit = async (e) => {
     e.preventDefault();
     const response = await fetch("/api/master/player-invitations", {
