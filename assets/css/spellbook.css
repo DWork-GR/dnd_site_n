@@ -193,3 +193,87 @@
   background-color: #fff;
   background-image: repeating-linear-gradient(transparent 0 23px, #8d765522 24px);
 }
+#sheet-tab-spells .spell-save-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  color: #fffaf0;
+  border: 0;
+  border-radius: 5px;
+  background: #79362b;
+  font-weight: 800;
+}
+#sheet-tab-spells .spell-card-view {
+  padding: 18px;
+}
+#sheet-tab-spells .spell-card-view > .feature-edit-button {
+  top: 12px;
+  right: 12px;
+}
+#sheet-tab-spells .spell-card-view header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding-right: 35px;
+}
+#sheet-tab-spells .spell-card-view header small {
+  color: #806c52;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#sheet-tab-spells .spell-card-view h4 {
+  margin: 3px 0 0;
+  color: #632b24;
+  font-size: 18px;
+}
+.spell-view-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
+}
+.spell-view-badges b {
+  padding: 4px 7px;
+  color: #632b24;
+  border: 1px solid #d1c0a5;
+  border-radius: 999px;
+  background: #f6efe3;
+  font-size: 8px;
+}
+.spell-view-meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+.spell-view-meta span {
+  padding: 8px;
+  border: 1px solid #dfd0b9;
+  border-radius: 5px;
+  background: #fffdf8;
+}
+.spell-view-meta small,
+.spell-view-meta strong {
+  display: block;
+}
+.spell-view-meta small {
+  color: #806c52;
+  font-size: 7px;
+  text-transform: uppercase;
+}
+.spell-view-meta strong {
+  margin-top: 3px;
+  color: #37251c;
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+.spell-view-description {
+  margin-top: 13px;
+  color: #3f3025;
+  font-family: Georgia, serif;
+  font-size: 12px;
+  line-height: 1.65;
+}

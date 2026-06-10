@@ -81,6 +81,18 @@
       A.editingSpells.splice(+spell.dataset.deleteSpell, 1);
       A.renderSpells();
     }
+    const editSpell = e.target.closest("[data-edit-spell]");
+    if (editSpell) {
+      A.editingSpells[+editSpell.dataset.editSpell]._editing = true;
+      A.renderSpells();
+    }
+    const saveSpell = e.target.closest("[data-save-spell]");
+    if (saveSpell) {
+      const item = A.editingSpells[+saveSpell.dataset.saveSpell];
+      item.name = item.name.trim() || "Без названия";
+      item._editing = false;
+      A.renderSpells();
+    }
     const feature = e.target.closest("[data-delete-feature]");
     if (feature) {
       A.editingFeatures.splice(+feature.dataset.deleteFeature, 1);
@@ -783,6 +795,7 @@
       prepared: false,
       ritual: false,
       concentration: false,
+      _editing: true,
     });
     A.renderSpells();
   };
@@ -905,7 +918,7 @@
       max: Number(f.elements[`slot-max-${i + 1}`].value || 0),
       used: Number(f.elements[`slot-used-${i + 1}`].value || 0),
     }));
-    c.spells = structuredClone(A.editingSpells);
+    c.spells = A.editingSpells.map(({ _editing, ...spell }) => spell);
     c.featureCards = A.editingFeatures.map(({ name, description }) => ({ name, description }));
     c.attackCards = A.editingAttackCards.map(({ name, damageDie, proficient, description }) => ({
       name,

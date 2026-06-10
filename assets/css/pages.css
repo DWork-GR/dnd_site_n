@@ -436,11 +436,13 @@
 .world-layout {
   display: grid;
   grid-template-columns: 1.1fr 1fr;
+  align-items: start;
   gap: 20px;
 }
 .map-card {
   position: relative;
-  min-height: 510px;
+  height: clamp(420px, 42vw, 510px);
+  min-height: 0;
   overflow: hidden;
   border: 1px solid rgba(215, 170, 94, 0.2);
   border-radius: 10px;
@@ -891,10 +893,76 @@ textarea {
   color: var(--muted);
   font-size: 8px;
 }
+.master-setting-title > div {
+  min-width: 0;
+  flex: 1;
+}
+.master-setting-edit {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--gold);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #100f0d;
+  transition: 0.2s;
+}
+.master-setting-edit:hover {
+  border-color: var(--gold);
+  transform: translateY(-1px);
+}
 .master-setting-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+[data-master-settings-card]:not(.editing) .master-setting-grid,
+[data-master-settings-card].editing .master-setting-summary,
+[data-master-settings-card].editing .master-setting-edit {
+  display: none;
+}
+.master-setting-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+.master-setting-summary .wide,
+.master-setting-summary > p {
+  grid-column: 1/-1;
+}
+.master-setting-summary small {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.master-setting-summary > div > div {
+  color: #e4dbcd;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 17px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.master-setting-summary > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+.master-setting-color {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.master-setting-color i {
+  width: 18px;
+  height: 18px;
+  border: 1px solid #fff3;
+  border-radius: 50%;
 }
 .master-setting-grid .wide {
   grid-column: 1/-1;

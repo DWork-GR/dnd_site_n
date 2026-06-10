@@ -1063,10 +1063,11 @@
         </header>
         <div class="master-account-layout">
           <div class="master-settings-column">
-            <section class="master-setting-card">
+            <section class="master-setting-card" data-master-settings-card>
               <div class="master-setting-title">
                 <span>01</span>
                 <div><strong>Кампания и мастер</strong><small>Основные подписи кабинета</small></div>
+                <button type="button" class="master-setting-edit" title="Редактировать карточку" aria-label="Редактировать карточку">✎</button>
               </div>
               <div class="master-setting-grid">
                 <label>Имя мастера<input name="displayName" /></label>
@@ -1075,11 +1076,27 @@
                 <label>Приветствие<input name="greeting" placeholder="Добрый вечер" /></label>
                 <label class="wide">Описание кампании<textarea name="campaignDescription"></textarea></label>
               </div>
+              <div class="master-setting-summary"></div>
             </section>
-            <section class="master-setting-card">
+            <section class="master-setting-card" data-master-settings-card>
               <div class="master-setting-title">
                 <span>02</span>
+                <div><strong>О мастере</strong><small>Ваша подпись и стиль ведения игры</small></div>
+                <button type="button" class="master-setting-edit" title="Редактировать карточку" aria-label="Редактировать карточку">✎</button>
+              </div>
+              <div class="master-setting-grid">
+                <label>Титул / роль<input name="masterTitle" placeholder="Хранитель мира" /></label>
+                <label>Связь<input name="masterContact" placeholder="Discord, Telegram или почта" /></label>
+                <label class="wide">Стиль игры<input name="masterStyle" placeholder="Исследование, интриги, героическое фэнтези..." /></label>
+                <label class="wide">О себе<textarea name="masterBio" placeholder="Несколько слов о себе как о мастере"></textarea></label>
+              </div>
+              <div class="master-setting-summary"></div>
+            </section>
+            <section class="master-setting-card" data-master-settings-card>
+              <div class="master-setting-title">
+                <span>03</span>
                 <div><strong>Облик архива</strong><small>Название, цвет и мир</small></div>
+                <button type="button" class="master-setting-edit" title="Редактировать карточку" aria-label="Редактировать карточку">✎</button>
               </div>
               <div class="master-setting-grid">
                 <label>Название сайта<input name="brandTitle" placeholder="Архив мастера" /></label>
@@ -1091,13 +1108,15 @@
                   >Акцентный цвет<input name="accentColor" type="color" value="#d7aa5e"
                 /></label>
               </div>
+              <div class="master-setting-summary"></div>
             </section>
-            <section class="master-setting-card">
+            <section class="master-setting-card" data-master-settings-card>
               <div class="master-setting-title">
-                <span>03</span>
+                <span>04</span>
                 <div>
                   <strong>Главный баннер</strong><small>Пустые поля подхватят ближайшую сессию</small>
                 </div>
+                <button type="button" class="master-setting-edit" title="Редактировать карточку" aria-label="Редактировать карточку">✎</button>
               </div>
               <div class="master-setting-grid">
                 <label
@@ -1116,10 +1135,11 @@
                   ></textarea>
                 </label>
               </div>
+              <div class="master-setting-summary"></div>
             </section>
             <section class="master-setting-card master-invite-card">
               <div class="master-setting-title">
-                <span>04</span>
+                <span>05</span>
                 <div>
                   <strong>Пригласить другого мастера</strong
                   ><small>Он получит отдельный кабинет и собственную кампанию</small>

@@ -493,7 +493,7 @@ Object.assign(DndApp, {
       if (form.elements[key]) form.elements[key].value = c[key] ?? "";
     });
     form.elements.inspiration.checked = Boolean(c.inspiration);
-    this.editingSpells = structuredClone(c.spells || []);
+    this.editingSpells = structuredClone(c.spells || []).map((spell) => ({ ...spell, _editing: false }));
     this.editingFeatures = structuredClone(
       c.featureCards || (c.features ? [{ name: "Общие умения и особенности", description: c.features }] : []),
     ).map((feature) => ({ ...feature, _editing: false }));
@@ -607,22 +607,31 @@ Object.assign(DndApp, {
       sorted
         .map(
           ({ spell, index }) =>
-            `<article class="spell-card" data-spell-card="${index}"><div class="spell-card-top"><label class="spell-prepared"><input type="checkbox" data-spell-field="prepared" ${spell.prepared ? "checked" : ""}>Подготовлено</label><label class="spell-name">Название<input data-spell-field="name" value="${this.escapeHtml(spell.name)}"></label><label>Уровень<select data-spell-field="level">${Array.from({ length: 10 }, (_, i) => `<option value="${i}" ${Number(spell.level) === i ? "selected" : ""}>${i === 0 ? "Заговор" : i}</option>`).join("")}</select></label><label>Школа<input data-spell-field="school" value="${this.escapeHtml(spell.school)}"></label><button type="button" class="delete" data-delete-spell="${index}">Удалить</button></div><div class="spell-meta">${[
-              ["castingTime", "Время накладывания"],
-              ["range", "Дистанция"],
-              ["components", "Компоненты"],
-              ["duration", "Длительность"],
-            ]
-              .map(
-                ([key, label]) =>
-                  `<label>${label}<input data-spell-field="${key}" value="${this.escapeHtml(spell[key])}"></label>`,
-              )
-              .join(
-                "",
-              )}<label class="spell-ritual"><input type="checkbox" data-spell-field="ritual" ${spell.ritual ? "checked" : ""}>Ритуал</label><label class="spell-concentration"><input type="checkbox" data-spell-field="concentration" ${spell.concentration ? "checked" : ""}>Концентрация</label></div><label class="spell-description">Описание и эффект<textarea data-spell-field="description">${this.escapeHtml(spell.description)}</textarea></label></article>`,
+            spell._editing
+              ? `<article class="spell-card editing" data-spell-card="${index}"><div class="spell-card-top"><label class="spell-prepared"><input type="checkbox" data-spell-field="prepared" ${spell.prepared ? "checked" : ""}>Подготовлено</label><label class="spell-name">Название<input data-spell-field="name" value="${this.escapeHtml(spell.name || "")}"></label><label>Уровень<select data-spell-field="level">${Array.from({ length: 10 }, (_, i) => `<option value="${i}" ${Number(spell.level) === i ? "selected" : ""}>${i === 0 ? "Заговор" : i}</option>`).join("")}</select></label><label>Школа<input data-spell-field="school" value="${this.escapeHtml(spell.school || "")}"></label><button type="button" class="delete" data-delete-spell="${index}">Удалить</button></div><div class="spell-meta">${[
+                  ["castingTime", "Время накладывания"],
+                  ["range", "Дистанция"],
+                  ["components", "Компоненты"],
+                  ["duration", "Длительность"],
+                ]
+                  .map(
+                    ([key, label]) =>
+                      `<label>${label}<input data-spell-field="${key}" value="${this.escapeHtml(spell[key] || "")}"></label>`,
+                  )
+                  .join("")}<label class="spell-ritual"><input type="checkbox" data-spell-field="ritual" ${spell.ritual ? "checked" : ""}>Ритуал</label><label class="spell-concentration"><input type="checkbox" data-spell-field="concentration" ${spell.concentration ? "checked" : ""}>Концентрация</label></div><label class="spell-description">Описание и эффект<textarea data-spell-field="description">${this.escapeHtml(spell.description || "")}</textarea></label><button type="button" class="spell-save-button" data-save-spell="${index}">Сохранить заклинание</button></article>`
+              : `<article class="spell-card spell-card-view" data-spell-card="${index}"><button type="button" class="feature-edit-button" data-edit-spell="${index}" title="Редактировать заклинание" aria-label="Редактировать заклинание">✎</button><header><div><small>${Number(spell.level) === 0 ? "Заговор" : `${Number(spell.level)} уровень`}${spell.school ? ` · ${this.escapeHtml(spell.school)}` : ""}</small><h4>${this.escapeHtml(spell.name || "Без названия")}</h4></div><div class="spell-view-badges">${spell.prepared ? "<b>Подготовлено</b>" : ""}${spell.ritual ? "<b>Ритуал</b>" : ""}${spell.concentration ? "<b>Концентрация</b>" : ""}</div></header><div class="spell-view-meta">${[
+                  ["Время", spell.castingTime],
+                  ["Дистанция", spell.range],
+                  ["Компоненты", spell.components],
+                  ["Длительность", spell.duration],
+                ]
+                  .filter(([, value]) => value)
+                  .map(([label, value]) => `<span><small>${label}</small><strong>${this.escapeHtml(value)}</strong></span>`)
+                  .join("")}</div><div class="spell-view-description">${window.RichText.render(spell.description || "", this.escapeHtml) || "Описание не заполнено"}</div></article>`,
         )
         .join("") ||
       `<div class="empty-state"><strong>Книга заклинаний пуста</strong><span>Добавьте первое заклинание игрока.</span></div>`;
+    window.RichText.enhance(this.$("#spell-list"));
   },
 
   renderFeatures() {

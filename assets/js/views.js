@@ -114,6 +114,18 @@ Object.assign(DndApp, {
     banner.style.backgroundPosition = settings.heroImageUrl ? "center" : "";
     this.$("#brand-title").textContent = settings.brandTitle || "Архив мастера";
     this.$("#brand-eyebrow").textContent = settings.brandEyebrow || "Личная летопись";
+    const profile = this.$("#master-profile");
+    const masterName = settings.masterName || "Хранитель";
+    profile.querySelector("strong").textContent = masterName;
+    profile.querySelector("small").textContent = settings.masterTitle || "Dungeon Master";
+    profile.querySelector(".avatar").textContent =
+      masterName
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join("")
+        .toUpperCase() || "DM";
     this.$("#sidebar-campaign-name").textContent = campaignName;
     this.$("#sidebar-campaign-meta").textContent =
       `${completed} сыграно${settings.campaignChapter ? ` · ${settings.campaignChapter}` : ""}`;

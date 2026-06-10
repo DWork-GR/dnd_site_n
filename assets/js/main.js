@@ -126,6 +126,33 @@
     );
   };
 
+  const renderMasterSettingCards = () => {
+    document.querySelectorAll("[data-master-settings-card]").forEach((card) => {
+      const items = [...card.querySelectorAll(".master-setting-grid [name]")]
+        .map((control) => {
+          const value = String(control.value || "").trim();
+          if (!value) return "";
+          const label = [...control.closest("label").childNodes]
+            .filter((node) => node.nodeType === Node.TEXT_NODE)
+            .map((node) => node.textContent.trim())
+            .filter(Boolean)
+            .join(" ");
+          const rendered =
+            control.type === "color"
+              ? `<span class="master-setting-color"><i style="background:${A.escapeHtml(value)}"></i>${A.escapeHtml(value)}</span>`
+              : control.tagName === "TEXTAREA"
+                ? window.RichText.render(value, A.escapeHtml)
+                : A.escapeHtml(value);
+          return `<div class="${control.tagName === "TEXTAREA" ? "wide" : ""}"><small>${A.escapeHtml(label)}</small><div>${rendered}</div></div>`;
+        })
+        .filter(Boolean);
+      card.querySelector(".master-setting-summary").innerHTML =
+        items.join("") || "<p>Карточка пока не заполнена. Нажмите на карандаш, чтобы добавить детали.</p>";
+      card.classList.remove("editing");
+      window.RichText.enhance(card.querySelector(".master-setting-summary"));
+    });
+  };
+
   document.querySelector("#master-profile").onclick = async () => {
     const profile = await loadMasterProfile();
     if (!profile) return;
@@ -141,6 +168,10 @@
       "campaignChapter",
       "greeting",
       "campaignDescription",
+      "masterTitle",
+      "masterContact",
+      "masterStyle",
+      "masterBio",
       "heroTitle",
       "heroKicker",
       "heroDescription",
@@ -152,7 +183,13 @@
     document.querySelector("#master-invite-link").textContent = "";
     document.querySelector("#master-account-dialog").showModal();
     updateMasterPreview();
+    renderMasterSettingCards();
   };
+  document.querySelector("#master-account-form").addEventListener("click", (event) => {
+    const edit = event.target.closest(".master-setting-edit");
+    if (!edit) return;
+    edit.closest("[data-master-settings-card]").classList.add("editing");
+  });
   document.querySelector("#master-account-form").addEventListener("input", updateMasterPreview);
   document.querySelector("#master-account-form").onsubmit = async (event) => {
     event.preventDefault();
@@ -166,6 +203,7 @@
     A.save();
     A.renderAll();
     await loadMasterProfile();
+    renderMasterSettingCards();
     A.toast("Настройки кабинета сохранены");
   };
   document.querySelector("#create-master-invite").onclick = async () => {
